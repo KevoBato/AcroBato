@@ -20,7 +20,7 @@ Standalone emulators (PCSX2, Dolphin, RPCS3, shadPS4 and more) can be downloaded
 - **Nintendo Switch, Switch 2 and PlayStation 5** (systems Batocera doesn't have), with emulators
   from the Content Downloader:
   - Switch: Eden (default), Ryujinx (Flathub) and Lichii
-  - Switch 2: Eglantine (default) and Lichii (both very experimental)
+  - Switch 2: Eglantine (default) and Lichii (both very experimental); games as `.nup`, `.nx` or `.sw2` folders
   - PS5: KytyPS5 (very experimental)
 
   Pick the emulator per game in *Advanced game options*. Eden, Eglantine and Lichii also have graphics,

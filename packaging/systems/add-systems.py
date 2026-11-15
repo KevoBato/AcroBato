@@ -22,7 +22,7 @@ HERE = Path(__file__).resolve().parent
 SYSTEMS = [
     ('switch', 'Nintendo Switch', 'Nintendo', '2017', '.xci .nsp .nca .nro .nso .xcz .nsz .emuapp',
      ['eden', 'ryujinx', 'lichii']),
-    ('switch2', 'Nintendo Switch 2', 'Nintendo', '2025', '.sw2 .emuapp', ['eglantine', 'lichii']),
+    ('switch2', 'Nintendo Switch 2', 'Nintendo', '2025', '.sw2 .nup .nx .emuapp', ['eglantine', 'lichii']),
     ('ps5', 'PlayStation 5', 'Sony', '2020', '.ps5 .elf .bin .self .json .emuapp', ['kyty']),
 ]
 EDEN_FAMILY = ['eden', 'eglantine', 'lichii']
@@ -46,7 +46,8 @@ controllers, updates and DLC.
 """,
     'switch2': """## Nintendo Switch 2 (very experimental)
 
-Games: dumps as folders named <game>.sw2 (containing base/exefs/main, base/romfs, ...)
+Games: .nup and .nx files, or dumps as folders named <game>.sw2 (containing base/exefs/main,
+base/romfs, ...)
 
 Emulators (Updates & Downloads > Content Downloader): Eglantine (default), Lichii.
 Pick one per game in the game's ADVANCED GAME OPTIONS > EMULATOR. Graphics, memory and other
