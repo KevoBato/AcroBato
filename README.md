@@ -1,4 +1,6 @@
-# AcroBato
+<p align="center">
+  <img src="packaging/branding/wordmark.png" alt="AcroBato" width="480">
+</p>
 
 A retro gaming frontend for desktop Linux and the Steam Deck, packaged as a single AppImage.
 
