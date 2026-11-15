@@ -248,7 +248,15 @@ class _EdenFamily(_Standalone):
         rom = Path(self.rom)
         if not rom.is_dir():
             return rom
-        # Switch 2 dumps are folders (base/exefs/main, base/romfs, ...): the emulator wants exefs/main
+        # Switch 2 dumps are folders (base/exefs/main, base/romfs, updates/<version>/...): the
+        # emulator wants an exefs/main. Many games only boot from their newest update, so that
+        # one is used when there is one (update folders are named by version number).
+        updates = [u for u in (rom / 'updates').glob('*/exefs/main') if u.is_file()]
+        if updates:
+            def version(p: Path) -> tuple[int, str]:
+                name = p.parent.parent.name
+                return (int(name), name) if name.isdigit() else (-1, name)
+            return max(updates, key=version)
         for candidate in ('base/exefs/main', 'exefs/main'):
             if (rom / candidate).is_file():
                 return rom / candidate
