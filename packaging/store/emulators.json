@@ -1,0 +1,77 @@
+{
+  "_comment": "Emulators offered in Updates & Downloads > Content Downloader. 'install' is the path Batocera's launcher runs; it is created under <userdata>/emulators/usr/... . Sources are each project's official releases.",
+  "emulators": [
+    {
+      "id": "pcsx2", "name": "PCSX2", "group": "EMULATORS",
+      "description": "PlayStation 2 emulator",
+      "source": {"type": "github", "repo": "PCSX2/pcsx2", "release": "latest", "asset": "^pcsx2-v.*-linux-appimage-x64-Qt\\.AppImage$"},
+      "install": "/usr/pcsx2/bin/pcsx2-qt"
+    },
+    {
+      "id": "duckstation", "name": "DuckStation", "group": "EMULATORS",
+      "description": "PlayStation 1 emulator",
+      "source": {"type": "github", "repo": "stenzek/duckstation", "release": "latest", "asset": "^DuckStation-x64\\.AppImage$"},
+      "install": "/usr/bin/duckstation-qt"
+    },
+    {
+      "id": "rpcs3", "name": "RPCS3", "group": "EMULATORS",
+      "description": "PlayStation 3 emulator",
+      "source": {"type": "github", "repo": "RPCS3/rpcs3-binaries-linux", "release": "latest", "asset": "^rpcs3-.*_linux64\\.AppImage$"},
+      "install": "/usr/bin/rpcs3"
+    },
+    {
+      "id": "ppsspp", "name": "PPSSPP", "group": "EMULATORS",
+      "description": "PlayStation Portable emulator",
+      "source": {"type": "github", "repo": "hrydgard/ppsspp", "release": "latest", "asset": "^PPSSPP-.*-anylinux-x86_64\\.AppImage$"},
+      "install": "/usr/bin/PPSSPP"
+    },
+    {
+      "id": "shadps4", "name": "shadPS4", "group": "EMULATORS",
+      "description": "PlayStation 4 emulator (experimental)",
+      "source": {"type": "github", "repo": "shadps4-emu/shadPS4", "release": "latest", "asset": "^shadps4-linux-sdl-.*\\.zip$", "member": "\\.AppImage$"},
+      "install": "/usr/bin/shadps4"
+    },
+    {
+      "id": "vita3k", "name": "Vita3K", "group": "EMULATORS",
+      "description": "PlayStation Vita emulator (experimental)",
+      "source": {"type": "github", "repo": "Vita3K/Vita3K", "release": "tags/continuous", "asset": "^Vita3K-x86_64\\.AppImage$"},
+      "install": "/usr/bin/vita3k/Vita3K"
+    },
+    {
+      "id": "dolphin", "name": "Dolphin", "group": "EMULATORS",
+      "description": "GameCube and Wii emulator (installed from Flathub)",
+      "source": {"type": "flatpak", "ref": "org.DolphinEmu.dolphin-emu", "remote": "flathub"},
+      "install": "/usr/bin/dolphin-emu"
+    },
+    {
+      "id": "cemu", "name": "Cemu", "group": "EMULATORS",
+      "description": "Wii U emulator (no checksum published upstream)",
+      "source": {"type": "github", "repo": "cemu-project/Cemu", "release": "latest", "asset": "^Cemu-.*-x86_64\\.AppImage$"},
+      "install": "/usr/bin/cemu/cemu"
+    },
+    {
+      "id": "azahar", "name": "Azahar", "group": "EMULATORS",
+      "description": "Nintendo 3DS emulator",
+      "source": {"type": "github", "repo": "azahar-emu/azahar", "release": "latest", "asset": "^azahar\\.AppImage$"},
+      "install": "/usr/bin/azahar"
+    },
+    {
+      "id": "melonds", "name": "melonDS", "group": "EMULATORS",
+      "description": "Nintendo DS emulator",
+      "source": {"type": "github", "repo": "melonDS-emu/melonDS", "release": "latest", "asset": "^melonDS-.*-appimage-x86_64\\.zip$", "member": "\\.AppImage$"},
+      "install": "/usr/bin/melonDS"
+    },
+    {
+      "id": "xemu", "name": "xemu", "group": "EMULATORS",
+      "description": "Original Xbox emulator",
+      "source": {"type": "github", "repo": "xemu-project/xemu", "release": "latest", "asset": "^xemu-[0-9.]+-x86_64\\.AppImage$"},
+      "install": "/usr/bin/xemu"
+    },
+    {
+      "id": "flycast", "name": "Flycast", "group": "EMULATORS",
+      "description": "Dreamcast, Naomi and Atomiswave emulator",
+      "source": {"type": "github", "repo": "flyinghead/flycast", "release": "latest", "asset": "^flycast-x86_64.*\\.AppImage$"},
+      "install": "/usr/bin/flycast"
+    }
+  ]
+}

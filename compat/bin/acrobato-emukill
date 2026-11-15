@@ -1,0 +1,19 @@
+#!/bin/sh
+# Closes the running game: everything started by the current batocera-launch.
+# hotkeygen runs this for "exit" where Batocera sends Alt+F4 (most standalone
+# emulators), since that relies on a window manager closing the window, which
+# Steam's Game Mode (gamescope) and some desktops don't do.
+L=$(pgrep -u "$(id -u)" -f 'from acrobato_launch import' | head -1)
+[ -n "$L" ] || exit 0
+tree() { for c in $(pgrep -P "$1"); do echo "$c"; tree "$c"; done; }
+P=$(tree "$L")
+[ -n "$P" ] || exit 0
+kill -TERM $P 2>/dev/null
+i=0
+while [ $i -lt 30 ]; do
+  alive=""; for p in $P; do kill -0 "$p" 2>/dev/null && alive="$alive $p"; done
+  [ -z "$alive" ] && exit 0
+  sleep 0.1; i=$((i+1))
+done
+kill -KILL $alive 2>/dev/null
+exit 0

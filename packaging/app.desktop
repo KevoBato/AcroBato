@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=AcroBato
+Comment=Retro gaming frontend built on Batocera's EmulationStation
+Exec=AppRun
+Icon=acrobato
+Categories=Game;Emulator;
+Terminal=false

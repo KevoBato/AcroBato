@@ -1,0 +1,55 @@
+#!/bin/sh
+# Desktop stand-in for Batocera's batocera-resolution.
+# On a desktop the compositor owns the display, so this never changes modes:
+# it only reports what is there. Override with ES_RESOLUTION=WIDTHxHEIGHT.
+
+# Print "WIDTH HEIGHT RATE OUTPUT" for the current primary display.
+detect() {
+    if [ -n "$ES_RESOLUTION" ]; then
+        echo "${ES_RESOLUTION%x*} ${ES_RESOLUTION#*x} 60.00 default"
+        return
+    fi
+    if command -v xrandr >/dev/null 2>&1 && [ -n "$DISPLAY" ]; then
+        # e.g. "eDP-1 connected primary 1280x800+0+0 right ..." then "   800x1280  89.87*+"
+        # The size on the "connected" line is after rotation (what games see);
+        # the starred mode line is the panel's native mode and gives the refresh rate.
+        out=$(xrandr --current 2>/dev/null 2>&1 | awk '
+            / connected/ && !name { name=$1
+                for (i=2;i<=NF;i++) if ($i ~ /^[0-9]+x[0-9]+\+/) { split($i, g, /[x+]/); w=g[1]; h=g[2] } }
+            /\*/ && !r { for (i=2;i<=NF;i++) if ($i ~ /\*/) { r=$i; gsub(/[*+]/, "", r) }
+                         if (!w) { split($1, wh, "x"); w=wh[1]; h=wh[2] } }
+            END { if (w) print w " " h " " (r ? r : "60.00") " " name }')
+        if [ -n "$out" ]; then echo "$out"; return; fi
+    fi
+    # Fallback: preferred mode of the first connected DRM connector.
+    for c in /sys/class/drm/card*-*; do
+        [ "$(cat "$c/status" 2>/dev/null)" = connected ] || continue
+        m=$(head -n1 "$c/modes" 2>/dev/null) || continue
+        [ -n "$m" ] || continue
+        w=${m%x*}; h=${m#*x}
+        # handheld panels (Steam Deck) are mounted rotated; games run landscape
+        if [ "$h" -gt "$w" ]; then t=$w; w=$h; h=$t; fi
+        echo "$w $h 60.00 ${c##*/card?-}"
+        return
+    done
+    echo "1280 720 60.00 default"
+}
+
+# Accept and ignore "--screen NAME" before the command.
+if [ "$1" = "--screen" ]; then shift 2; fi
+
+read -r W H R O <<EOF
+$(detect)
+EOF
+
+case "$1" in
+    currentResolution) echo "${W}x${H}" ;;
+    currentMode)       echo "${W}x${H}.${R}" ;;
+    refreshRate)       echo "$R" ;;
+    currentOutput)     echo "$O" ;;
+    listOutputs)       echo "$O" ;;
+    listModes)         echo "default:automatic"; echo "${W}x${H}.${R}:${W}x${H} ${R}Hz" ;;
+    supportSystemRotation) exit 1 ;;
+    setMode|minTomaxResolution|setDPMS|forceMode|configureWindow|setRotation) exit 0 ;;
+    *) echo "batocera-resolution (desktop): unsupported '$1'" >&2; exit 0 ;;
+esac

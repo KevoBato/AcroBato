@@ -1,0 +1,22 @@
+#!/bin/sh
+# Starts/stops evmapy (controller combos -> hotkeys) for the running game.
+# Same commands as Batocera's batocera-evmapy, using the user's runtime folder.
+D="${ES_RUN:-/var/run}/evmapy"
+PIDF="${ES_RUN:-/var/run}/evmapy.pid"
+stop() {
+  [ -f "$PIDF" ] && kill -9 "$(cat "$PIDF")" 2>/dev/null
+  rm -f "$PIDF"
+}
+case "$1" in
+  start)
+    stop
+    mkdir -p "$D" || exit 1
+    rm -f "$D/ready"
+    nohup "$APPDIR/usr/python/bin/python3" -I -m evmapy </dev/null >/dev/null 2>&1 &
+    echo $! > "$PIDF"
+    # evmapy creates the ready flag once it is reading the controllers
+    i=0; while [ ! -e "$D/ready" ] && [ $i -lt 50 ]; do sleep 0.1; i=$((i+1)); done
+    exit 0 ;;
+  stop) stop; exit 0 ;;
+  clear) rm -rf "$D" && mkdir -p "$D" ;;
+esac

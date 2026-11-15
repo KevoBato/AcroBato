@@ -1,0 +1,6 @@
+#!/bin/sh
+# Desktop stand-in for Batocera system commands that have no meaning (or no
+# implementation yet) outside Batocera OS. Symlinked under each command's name.
+# Succeeds silently; set ES_COMPAT_DEBUG=1 to log calls to stderr.
+[ -n "$ES_COMPAT_DEBUG" ] && echo "compat no-op: $(basename "$0") $*" >&2
+exit 0

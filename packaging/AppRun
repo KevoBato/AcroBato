@@ -1,0 +1,99 @@
+#!/bin/sh
+# AppImage entry point. Maps Batocera's fixed layout onto this AppImage and the
+# user's home folder, starts the hotkey daemon, then runs EmulationStation.
+HERE="$(dirname "$(readlink -f "$0")")"
+export APPDIR="${APPDIR:-$HERE}"
+APP_ID=acrobato
+
+# Built on Ubuntu 22.04: needs glibc 2.35+ (Ubuntu 22.04+, Mint 21+, Debian 12+, Fedora,
+# Arch, SteamOS, openSUSE Tumbleweed...). Say so plainly instead of failing with a linker error.
+GLIBC_MIN=2.35
+glibc=$(getconf GNU_LIBC_VERSION 2>/dev/null); glibc=${glibc#glibc }
+if [ -n "$glibc" ] && [ "$(printf '%s\n%s\n' "$GLIBC_MIN" "$glibc" | sort -V | head -1)" != "$GLIBC_MIN" ]; then
+  msg="AcroBato needs a newer Linux system (glibc $GLIBC_MIN or newer; this one has $glibc).
+Supported: Ubuntu 22.04+, Linux Mint 21+, Debian 12+, Fedora, Arch, SteamOS and similar."
+  echo "$msg" >&2
+  if command -v zenity >/dev/null 2>&1; then zenity --error --title=AcroBato --text="$msg" 2>/dev/null
+  elif command -v kdialog >/dev/null 2>&1; then kdialog --title AcroBato --error "$msg" 2>/dev/null
+  elif command -v notify-send >/dev/null 2>&1; then notify-send AcroBato "$msg" 2>/dev/null; fi
+  exit 1
+fi
+
+# Where the user's games, saves and settings live (stands in for /userdata).
+export ES_USERDATA="${ES_USERDATA:-${XDG_DATA_HOME:-$HOME/.local/share}/$APP_ID}"
+# Read-only app data inside the AppImage (stands in for /usr/share, /etc, /usr/bin).
+export ES_SHARE="$APPDIR/usr/share"
+export ES_ETC="$APPDIR/etc"
+# Emulators downloaded from the menu live in <userdata>/emulators/usr (see acrobato_store.py).
+export ES_USR="$ES_USERDATA/emulators/usr"
+export ES_BIN="$APPDIR/usr/bin:$ES_USR/bin"
+export ES_LIBRETRO_CORES="$APPDIR/usr/lib/libretro:$ES_USR/lib/libretro"
+export ES_RUN="${XDG_RUNTIME_DIR:-/tmp}/$APP_ID"
+export ES_DBUS=session
+# Batocera OS always sets LANG; some launcher modules (e.g. Dolphin's language) read it directly
+export LANG="${LANG:-en_US.UTF-8}"
+# hotkeygen and the launcher talk over the session bus; desktop sessions set this,
+# but fall back to the standard socket when started from elsewhere (ssh, some launchers).
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && [ -S "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/bus" ]; then
+  export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/bus"
+fi
+# Controllers under Steam: games Steam launches get SDL_GAMECONTROLLER_ALLOW_STEAM_VIRTUAL_GAMEPAD
+# (plus the list of physical pads to ignore), so ES sees one Steam virtual pad per player.
+# Started outside Steam on a Steam Deck while Steam runs (Desktop Mode), Steam still holds the
+# built-in controls and only its virtual pad has them, so allow it there too.
+if [ -z "$SDL_GAMECONTROLLER_ALLOW_STEAM_VIRTUAL_GAMEPAD" ] && \
+   [ "$(cat /sys/class/dmi/id/board_vendor 2>/dev/null)" = "Valve" ] && \
+   pgrep -x -u "$(id -u)" steam >/dev/null 2>&1; then
+  export SDL_GAMECONTROLLER_ALLOW_STEAM_VIRTUAL_GAMEPAD=1
+fi
+# downloaded emulators too: some launcher modules run them by bare name (e.g. dolphin-emu)
+export PATH="$APPDIR/usr/bin:$ES_USR/bin:$PATH"
+export VLC_PLUGIN_PATH="$APPDIR/usr/lib/vlc/plugins"
+mkdir -p "$ES_RUN"
+
+# First run (and after updates): create the folder layout without touching existing files.
+U="$ES_USERDATA"
+# one-time move from earlier pre-release names (only when using the default location):
+# "acrobat" (until 2026-11-15), before that "rbl"
+if [ "$U" = "${XDG_DATA_HOME:-$HOME/.local/share}/$APP_ID" ] && [ ! -e "$U" ]; then
+  for OLD in acrobat rbl; do
+    OLD="${XDG_DATA_HOME:-$HOME/.local/share}/$OLD"
+    if [ -d "$OLD" ] && [ ! -L "$OLD" ]; then
+      mv "$OLD" "$U"
+      # emulator configs and history files that stored the old full path
+      grep -rlIF "$OLD/" "$U/system/configs" "$U/emulators/usr/bin" 2>/dev/null | while IFS= read -r f; do
+        sed -i "s#$OLD/#$U/#g" "$f"
+      done
+      break
+    fi
+  done
+fi
+mkdir -p "$U/roms" "$U/bios" "$U/saves" "$U/screenshots" "$U/themes" "$U/decorations" \
+         "$U/music" "$U/cheats" "$U/system/configs/emulationstation" "$U/system/logs" "$U/emulators"
+[ -f "$U/system/batocera.conf" ] || cp "$ES_SHARE/batocera/datainit/system/batocera.conf" "$U/system/batocera.conf"
+# one folder per system, each with Batocera's _info.txt describing extensions/BIOS
+cp -rn "$ES_SHARE/batocera/datainit/roms/." "$U/roms/" 2>/dev/null
+# Data the bundled Dolphin/PPSSPP cores look for in the BIOS folder. The AppImage's mount
+# path changes every run, so links are refreshed; a real folder the user put there is kept.
+link_data() {  # <bios subpath> <bundled dir>
+  if [ -d "$2" ] && { [ -L "$U/bios/$1" ] || [ ! -e "$U/bios/$1" ]; }; then
+    mkdir -p "$(dirname "$U/bios/$1")"; ln -sfn "$2" "$U/bios/$1"
+  fi
+}
+link_data dolphin-emu/Sys "$ES_SHARE/dolphin-emu/Sys"
+link_data PPSSPP "$ES_SHARE/ppsspp/PPSSPP"
+# (No games are bundled. With an empty library ES shows all systems and a welcome message
+# saying where games go; see apply-es-fixes.py.)
+
+# Hotkey daemon (Hotkey+Start to quit a game, etc.). One per session.
+HK_PID=""
+if ! pgrep -u "$(id -u)" -f "argv\[0\] = \"hotkeygen\"" >/dev/null 2>&1; then
+  hotkeygen >"$U/system/logs/hotkeygen.log" 2>&1 &
+  HK_PID=$!
+fi
+
+cd "$U" || exit 1
+"$APPDIR/usr/bin/emulationstation" "$@"
+rc=$?
+[ -n "$HK_PID" ] && kill "$HK_PID" 2>/dev/null
+exit $rc

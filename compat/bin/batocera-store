@@ -1,0 +1,4 @@
+#!/bin/sh
+# Emulator downloader for EmulationStation's "Content Downloader" menu.
+# Implementation: share/acrobato/acrobato_store.py (run with the bundled Python).
+exec "$APPDIR/usr/python/bin/python3" "$ES_SHARE/acrobato/acrobato_store.py" "$@"

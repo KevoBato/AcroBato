@@ -1,0 +1,126 @@
+diff --git a/es-app/src/ApiSystem.cpp b/es-app/src/ApiSystem.cpp
+index 0ad2826..12c6ebd 100644
+--- a/es-app/src/ApiSystem.cpp
++++ b/es-app/src/ApiSystem.cpp
+@@ -2295,9 +2295,22 @@ bool ApiSystem::isScriptingSupported(ScriptId script)
+ 	if (executables.size() == 0)
+ 		return true;
+ 
++	// Relocatable layout: helper commands may live in ES_BIN (e.g. inside an AppImage)
++	// ES_BIN may list several folders separated by ':', like PATH
++	const char* envBin = getenv("ES_BIN");
++	std::vector<std::string> binDirs = { "/usr/bin" };
++	if (envBin && *envBin)
++		for (auto dir : Utils::String::split(envBin, ':', true))
++			binDirs.push_back(dir);
++
+ 	for (auto executable : executables)
+-		if (!Utils::FileSystem::exists("/usr/bin/" + executable))
++	{
++		bool found = false;
++		for (auto dir : binDirs)
++			if (Utils::FileSystem::exists(dir + "/" + executable)) { found = true; break; }
++		if (!found)
+ 			return false;
++	}
+ 
+ 	return true;
+ }
+diff --git a/es-app/src/SystemData.cpp b/es-app/src/SystemData.cpp
+index 544e92e..4c91bff 100644
+--- a/es-app/src/SystemData.cpp
++++ b/es-app/src/SystemData.cpp
+@@ -1134,6 +1134,12 @@ SystemData* SystemData::loadSystem(pugi::xml_node system, bool fullMode)
+ 
+ 	path = system.child("path").text().get();
+ 
++#if BATOCERA
++	// Relocatable layout (ES_USERDATA): es_systems.cfg is generated with /userdata paths
++	if (Utils::String::startsWith(path, "/userdata/") && Paths::getRootPath() != "/userdata")
++		path = Paths::getRootPath() + path.substr(9);
++#endif
++
+ 	SystemMetadata md;
+ 	md.name = system.child("name").text().get();
+ 	md.fullName = system.child("fullname").text().get();
+diff --git a/es-core/src/Paths.cpp b/es-core/src/Paths.cpp
+index 25e70f1..e8a1742 100644
+--- a/es-core/src/Paths.cpp
++++ b/es-core/src/Paths.cpp
+@@ -1,4 +1,5 @@
+ #include "Paths.h"
++#include <cstdlib>
+ #include "Log.h"
+ #include <iostream>
+ #include <fstream>
+@@ -46,30 +47,35 @@ Paths::Paths()
+ 	// Here, BATOCERA & Forks can define their own paths
+ 
+ #if BATOCERA
+-	mRootPath = "/userdata";
+-	mEmulationStationPath = "/usr/share/emulationstation";
+-	mUserEmulationStationPath = "/userdata/system/configs/emulationstation";
+-
+-	mLogPath = "/userdata/system/logs";
+-	mScreenShotsPath = "/userdata/screenshots";
+-	mSaveStatesPath = "/userdata/saves";
+-	mMusicPath = "/usr/share/batocera/music";
+-	mUserMusicPath = "/userdata/music";
+-	mThemesPath = "/usr/share/emulationstation/themes";
+-	mUserThemesPath = "/userdata/themes";
+-	mKeyboardMappingsPath = "/usr/share/evmapy";
+-	mUserKeyboardMappingsPath = "/userdata/system/configs/evmapy";
+-	mDecorationsPath = "/usr/share/batocera/datainit/decorations";
+-	mUserDecorationsPath = "/userdata/decorations";
+-	mShadersPath = "/usr/share/batocera/shaders/configs";
+-	mUserShadersPath = "/userdata/shaders/configs";
++	// Relocatable layout: ES_USERDATA replaces /userdata, ES_SHARE replaces /usr/share
++	const char* envU = getenv("ES_USERDATA");
++	const char* envS = getenv("ES_SHARE");
++	const std::string U = (envU && *envU) ? std::string(envU) : std::string("/userdata");
++	const std::string S = (envS && *envS) ? std::string(envS) : std::string("/usr/share");
++	mRootPath = U;
++	mEmulationStationPath = S + "/emulationstation";
++	mUserEmulationStationPath = U + "/system/configs/emulationstation";
++
++	mLogPath = U + "/system/logs";
++	mScreenShotsPath = U + "/screenshots";
++	mSaveStatesPath = U + "/saves";
++	mMusicPath = S + "/batocera/music";
++	mUserMusicPath = U + "/music";
++	mThemesPath = S + "/emulationstation/themes";
++	mUserThemesPath = U + "/themes";
++	mKeyboardMappingsPath = S + "/evmapy";
++	mUserKeyboardMappingsPath = U + "/system/configs/evmapy";
++	mDecorationsPath = S + "/batocera/datainit/decorations";
++	mUserDecorationsPath = U + "/decorations";
++	mShadersPath = S + "/batocera/shaders/configs";
++	mUserShadersPath = U + "/shaders/configs";
+ 	mTimeZonesPath = "/usr/share/zoneinfo/";
+-	mRetroachivementSounds = "/usr/share/libretro/assets/sounds";
+-	mUserRetroachivementSounds = "/userdata/sounds/retroachievements";
++	mRetroachivementSounds = S + "/libretro/assets/sounds";
++	mUserRetroachivementSounds = U + "/sounds/retroachievements";
+ 	
+-	mSystemConfFilePath = "/userdata/system/batocera.conf";
+-	mUserManualPath = "/usr/share/batocera/doc/notice.pdf";
+-	mVersionInfoPath = "/usr/share/batocera/batocera.version";
++	mSystemConfFilePath = U + "/system/batocera.conf";
++	mUserManualPath = S + "/batocera/doc/notice.pdf";
++	mVersionInfoPath = S + "/batocera/batocera.version";
+ 	mKodiPath = "/usr/bin/kodi";
+ #endif
+ 
+diff --git a/es-core/src/utils/Platform.cpp b/es-core/src/utils/Platform.cpp
+index 8caa683..f77d57d 100644
+--- a/es-core/src/utils/Platform.cpp
++++ b/es-core/src/utils/Platform.cpp
+@@ -696,7 +696,7 @@ namespace Utils
+ #if WIN32
+ 			return "windows";
+ #else
+-			std::string arch = Utils::FileSystem::readAllText("/usr/share/batocera/batocera.arch");
++			std::string arch = Utils::FileSystem::readAllText(std::string(getenv("ES_SHARE") ? getenv("ES_SHARE") : "/usr/share") + "/batocera/batocera.arch");
+ 			if (!arch.empty())
+ 				return arch;
+ 
