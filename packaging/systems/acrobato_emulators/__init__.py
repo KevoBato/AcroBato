@@ -206,6 +206,70 @@ def apply_es_options(qt_config: Path, state_file: Path, system: str, game: str) 
     state_file.write_text(json.dumps(state))
 
 
+# --- Eden-family controls from the controllers ES passes ---------------------------------------
+
+# Switch button -> ES input name (Batocera's positional layout: ES "a" is the right face button,
+# like the Switch's A). The pads' SDL numbers come straight from ES's controller config.
+NX_BUTTONS = {
+    'button_a': 'a', 'button_b': 'b', 'button_x': 'x', 'button_y': 'y',
+    'button_lstick': 'l3', 'button_rstick': 'r3', 'button_l': 'pageup', 'button_r': 'pagedown',
+    'button_zl': 'l2', 'button_zr': 'r2', 'button_plus': 'start', 'button_minus': 'select',
+    'button_dup': 'up', 'button_ddown': 'down', 'button_dleft': 'left', 'button_dright': 'right',
+    'button_slleft': 'pageup', 'button_srleft': 'pagedown', 'button_slright': 'pageup', 'button_srright': 'pagedown',
+}
+HAT_DIRECTIONS = {'1': 'up', '2': 'right', '4': 'down', '8': 'left'}
+
+
+def nx_binding(guid: str, port: int, inp) -> str:
+    if inp.type == 'button':
+        return f'"engine:sdl,guid:{guid},port:{port},button:{inp.id}"'
+    if inp.type == 'hat':
+        return f'"engine:sdl,guid:{guid},hat:{inp.id},port:{port},direction:{HAT_DIRECTIONS.get(inp.value, "up")}"'
+    if inp.type == 'axis':
+        sign = '-' if inp.value.startswith('-') else '+'
+        return f'"engine:sdl,guid:{guid},threshold:0.500000,port:{port},axis:{inp.id},invert:{sign}"'
+    return '[empty]'
+
+
+def nx_stick(guid: str, port: int, x, y) -> str:
+    return (f'"engine:sdl,guid:{guid},axis_x:{x.id},offset_x:-0.000000,invert_y:+,deadzone:0.150000,'
+            f'port:{port},axis_y:{y.id},offset_y:0.000000,invert_x:+"')
+
+
+def apply_controls(qt_config: Path, controllers) -> None:
+    """Map the players' controllers in qt-config.ini, as the emulator's own controller setup
+    would (Pro Controller, SDL). Without this, games start with no controller mapped."""
+    ini = QtIni(qt_config)
+    players = sorted((c for c in controllers or [] if c is not None and c.type == 'joystick'),
+                     key=lambda c: c.player_number)[:8]
+    seen: dict[str, int] = {}
+    for n in range(8):
+        if n >= len(players):
+            ini.set('Controls', f'player_{n}_connected', 'false', 'false')
+            continue
+        c = players[n]
+        port = seen.get(c.guid, 0)
+        seen[c.guid] = port + 1
+        inputs = c.inputs
+        ini.set('Controls', f'player_{n}_type', '0', 'false')
+        ini.set('Controls', f'player_{n}_connected', 'true', 'false')
+        for key, es_name in NX_BUTTONS.items():
+            if es_name in inputs:
+                ini.set('Controls', f'player_{n}_{key}', nx_binding(c.guid, port, inputs[es_name]), 'false')
+        # Home: the hotkey button when it's a button of its own. Steam's virtual pads use Select
+        # as hotkey (Steam keeps the Steam/Guide button), but still report Guide as button 8.
+        hotkey, select = inputs.get('hotkey'), inputs.get('select')
+        if hotkey and not (select and (hotkey.type, hotkey.id) == (select.type, select.id)):
+            ini.set('Controls', f'player_{n}_button_home', nx_binding(c.guid, port, hotkey), 'false')
+        elif c.guid[8:20] == 'de280000ff11':  # Steam virtual gamepad (28de:11ff)
+            ini.set('Controls', f'player_{n}_button_home',
+                    f'"engine:sdl,guid:{c.guid},port:{port},button:8"', 'false')
+        for stick, (xs, ys) in (('lstick', ('joystick1left', 'joystick1up')), ('rstick', ('joystick2left', 'joystick2up'))):
+            if xs in inputs and ys in inputs:
+                ini.set('Controls', f'player_{n}_{stick}', nx_stick(c.guid, port, inputs[xs], inputs[ys]), 'false')
+    ini.save()
+
+
 # --- emulators ----------------------------------------------------------------------------------
 
 @cached_dataclass
@@ -277,6 +341,7 @@ class _EdenFamily(_Standalone):
                          self.config_home / 'acrobato-es-options.json', self.system, game)
         if not game:
             return Command([exe], env=env)
+        apply_controls(self.config_home / self.profile / 'qt-config.ini', self.controllers)
         # acrobato-watchdog closes the emulator before it runs the machine out of memory
         return Command(['acrobato-watchdog', exe, '-f', '-g', self.game_file()], env=env)
 
