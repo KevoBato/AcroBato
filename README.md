@@ -24,7 +24,7 @@ Standalone emulators (PCSX2, Dolphin, RPCS3, shadPS4 and more) can be downloaded
   - PS5: KytyPS5 (very experimental)
 
   Pick the emulator per game in *Advanced game options*. Eden, Eglantine and Lichii also have graphics,
-  memory and system settings there. Keys and firmware go in `bios/switch/` or `bios/switch2/`, and
+  memory and system settings there. Switch keys and firmware go in `bios/switch/` (Switch 2 needs none), and
   "Open <emulator>" entries in each system's list open the emulator's own window.
 - **Controllers:** Batocera's controller database (about 340 pads). Steam's virtual controllers
   are supported in Game Mode and when launched from Steam.

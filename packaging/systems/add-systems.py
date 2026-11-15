@@ -53,10 +53,7 @@ Emulators (Updates & Downloads > Content Downloader): Eglantine (default), Lichi
 Pick one per game in the game's ADVANCED GAME OPTIONS > EMULATOR. Graphics, memory and other
 settings are there too.
 
-Keys and firmware from a Switch 2 you own:
-- bios/switch2/prod.keys and bios/switch2/title.keys
-- bios/switch2/firmware/ (the firmware .nca files)
-They are copied into the emulator's profile before each game.
+No keys or firmware are needed.
 
 Switch 2 games need a lot of memory (16 GB of RAM or more) and a strong graphics card.
 AcroBato closes the emulator if memory runs out, before the computer freezes.
