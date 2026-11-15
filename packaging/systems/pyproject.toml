@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "acrobato-emulators"
+version = "1.0"
+description = "AcroBato's Switch, Switch 2 and PS5 emulators for batocera-launch"
+license = "GPL-3.0-or-later"
+
+[project.entry-points."batocera_launch.emulators"]
+eden = "acrobato_emulators:Eden"
+ryujinx = "acrobato_emulators:Ryujinx"
+eglantine = "acrobato_emulators:Eglantine"
+lichii = "acrobato_emulators:Lichii"
+kyty = "acrobato_emulators:Kyty"
+
+[tool.setuptools]
+packages = ["acrobato_emulators"]

@@ -70,20 +70,30 @@ def find(name: str) -> dict:
 
 
 def github_release(src: dict) -> dict:
-    url = f"https://api.github.com/repos/{src['repo']}/releases/{src['release']}"
+    """The download for this emulator from its official releases.
+    type "github" (api.github.com) or "gitea" (a Gitea/Forgejo server, src["server"]).
+    release "latest" / "tags/<tag>", or "recent": the newest of the last 15 releases (pre-releases
+    included) that has a matching file; some projects publish releases without a Linux build."""
+    if src['type'] == 'gitea':
+        base = f"{src['server']}/api/v1/repos/{src['repo']}/releases"
+    else:
+        base = f"https://api.github.com/repos/{src['repo']}/releases"
+    release = src.get('release', 'latest')
+    url = f'{base}?limit=15&per_page=15' if release == 'recent' else f'{base}/{release}'
     with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
-        rel = json.load(r)
-    for a in rel.get('assets', []):
-        if re.search(src['asset'], a['name']):
-            return {'version': rel.get('tag_name', ''), 'asset': a['name'], 'url': a['browser_download_url'],
-                    'size': a.get('size', 0), 'digest': a.get('digest') or ''}
-    raise RuntimeError(f"no matching download in {src['repo']} {rel.get('tag_name')}")
+        data = json.load(r)
+    for rel in (data if isinstance(data, list) else [data]):
+        for a in rel.get('assets', []):
+            if re.search(src['asset'], a['name']):
+                return {'version': rel.get('tag_name', ''), 'asset': a['name'], 'url': a['browser_download_url'],
+                        'size': a.get('size', 0), 'digest': a.get('digest') or ''}
+    raise RuntimeError(f"no matching download in {src['repo']} ({release})")
 
 
 def refresh() -> None:
     cache = {}
     for e in catalog():
-        if e['source']['type'] == 'github':
+        if e['source']['type'] in ('github', 'gitea'):
             try:
                 cache[e['id']] = github_release(e['source'])
             except Exception as ex:  # keep going; one project being down shouldn't hide the rest
@@ -119,7 +129,8 @@ def cmd_list() -> None:
                          ('repository', 'Emulators'), ('arch', 'x86_64'),
                          ('available_version', info.get('version', '')),
                          ('download_size', str(info.get('size', 0) // 1024)),  # ES expects KB
-                         ('url', f"https://github.com/{e['source']['repo']}" if 'repo' in e['source'] else ''),
+                         ('url', f"{e['source'].get('server', 'https://github.com')}/{e['source']['repo']}"
+                          if 'repo' in e['source'] else ''),
                          ('status', 'installed' if installed else '')):
             out.append(f'    <{tag}>{escape(str(val))}</{tag}>')
         out.append('  </package>')
@@ -167,6 +178,25 @@ def install_github(e: dict) -> str:
     with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
         dl = Path(tmp) / info['asset']
         download(info['url'], dl, e['name'], info['size'], info['digest'])
+        if e['source'].get('archive') == 'tar.gz':  # a whole program folder (e.g. KytyPS5)
+            import tarfile
+            say('Extracting')
+            with tarfile.open(dl) as t:
+                t.extractall(Path(tmp) / 'x', filter='data')
+            exes = [p for p in (Path(tmp) / 'x').rglob(e['source']['exe']) if p.is_file()]
+            if not exes:
+                raise RuntimeError(f"archive does not contain {e['source']['exe']}")
+            if app_dir.exists():
+                shutil.rmtree(app_dir)
+            shutil.move(exes[0].parent, app_dir)
+            exe = app_dir / exes[0].name
+            exe.chmod(0o755)
+            rel = os.path.relpath(exe, target(e).parent)
+            # run from its own folder: some programs look for their files next to themselves
+            write_launcher(target(e), (
+                f'EXE="$(dirname "$(readlink -f "$0")")/{rel}"\n'
+                'cd "$(dirname "$EXE")" && exec "$EXE" "$@"\n'))
+            return info['version']
         if 'member' in e['source']:  # AppImage inside a zip
             with zipfile.ZipFile(dl) as z:
                 names = [n for n in z.namelist() if re.search(e['source']['member'], n)]
@@ -187,6 +217,8 @@ def install_github(e: dict) -> str:
     write_launcher(target(e), (
         f'APP="$(dirname "$(readlink -f "$0")")/{rel}"\n'
         'unset APPDIR APPIMAGE ARGV0 OWD\n'
+        '# updates come from the Content Downloader; some AppImages otherwise ask on first start\n'
+        'export DISABLE_AUTO_UPDATES=1\n'
         'if ! command -v fusermount3 >/dev/null 2>&1 && ! command -v fusermount >/dev/null 2>&1; then\n'
         '  export APPIMAGE_EXTRACT_AND_RUN=1\n'
         'fi\n'
@@ -236,11 +268,22 @@ def cmd_install(name: str) -> None:
     state = load(STATE, {})
     state[e['id']] = {'version': version, 'installed': time.strftime('%Y-%m-%d')}
     save(STATE, state)
+    for f in window_entries(e):
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(e['id'] + '\n')
     say(f"{e['name']} installed")
+
+
+def window_entries(e: dict) -> list[Path]:
+    """'Open <emulator>.emuapp' entries in the game lists of the systems it runs: they open
+    the emulator's own window (firmware, keys, settings). See acrobato_emulators."""
+    return [USERDATA / 'roms' / s / f"Open {e['name']}.emuapp" for s in e.get('systems', [])]
 
 
 def cmd_remove(name: str) -> None:
     e = find(name)
+    for f in window_entries(e):
+        f.unlink(missing_ok=True)
     target(e).unlink(missing_ok=True)
     shutil.rmtree(APPS / e['id'], ignore_errors=True)
     if e['source']['type'] == 'flatpak' and shutil.which('flatpak'):

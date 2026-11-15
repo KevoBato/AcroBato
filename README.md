@@ -16,7 +16,16 @@ Standalone emulators (PCSX2, Dolphin, RPCS3, shadPS4 and more) can be downloaded
   Mega Drive/Genesis, Master System, Game Gear, Saturn, Dreamcast, PC Engine, Neo Geo, arcade, DOS,
   Amiga, MSX, 3DO, Lynx, WonderSwan, Atari 2600/7800, Vectrex and more.
 - **Emulator downloads:** *Updates & Downloads > Content Downloader* installs standalone emulators
-  from their official releases (checksum-verified) or Flathub.
+  from their official releases (checksum-verified where the project publishes checksums) or Flathub.
+- **Nintendo Switch, Switch 2 and PlayStation 5** (systems Batocera doesn't have), with emulators
+  from the Content Downloader:
+  - Switch: Eden (default), Ryujinx (Flathub) and Lichii
+  - Switch 2: Eglantine (default) and Lichii (both very experimental)
+  - PS5: KytyPS5 (very experimental)
+
+  Pick the emulator per game in *Advanced game options*. Eden, Eglantine and Lichii also have graphics,
+  memory and system settings there. Keys and firmware go in `bios/switch/` or `bios/switch2/`, and
+  "Open <emulator>" entries in each system's list open the emulator's own window.
 - **Controllers:** Batocera's controller database (about 340 pads). Steam's virtual controllers
   are supported in Game Mode and when launched from Steam.
 - **Hotkeys:** Hotkey + Start quits a game, Hotkey + Y / X saves / loads a state, and more

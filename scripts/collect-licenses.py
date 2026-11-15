@@ -138,6 +138,10 @@ for di in sorted((py / 'site-packages').glob('*.dist-info')):
     lic_s = (lic.group(1).strip() if lic and len(lic.group(1)) < 80 else '') or ', '.join(cls) or 'see license file'
     files = [p for p in di.rglob('*') if p.is_file() and LIC_NAMES.match(p.name)]
     n = name.group(1).strip() if name else di.name
+    if n == 'acrobato-emulators':  # AcroBato's own (packaging/systems)
+        rows.append((f'{n} (Python package, part of AcroBato)', ver.group(1).strip() if ver else '',
+                     'GPL-3.0-or-later', 'AcroBato source repository', ['acrobato/LICENSE']))
+        continue
     if n.startswith(('batocera', 'python-batocera')) or n == 'hotkeygen':  # part of batocera.linux
         rows.append((f'{n} (Python package, part of Batocera)', ver.group(1).strip() if ver else '',
                      'LGPL-3.0-or-later', 'https://github.com/batocera-linux/batocera.linux',

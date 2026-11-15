@@ -29,6 +29,26 @@ def _conf(path: Path) -> dict[str, str]:
     return values
 
 
+def _emulator_window(args: list[str]) -> list[str]:
+    """'Open <emulator>.emuapp' entries (written by the Content Downloader) open that emulator's
+    own window, whatever the system's or game's emulator setting is."""
+    if '-rom' not in args or not args[args.index('-rom') + 1].lower().endswith('.emuapp'):
+        return args
+    try:
+        emu = Path(args[args.index('-rom') + 1]).read_text().strip()
+    except OSError:
+        return args
+    out, skip = [], False
+    for a in args:
+        if skip:
+            skip = False
+        elif a in ('-emulator', '-core'):
+            skip = True
+        else:
+            out.append(a)
+    return out + ['-emulator', emu, '-core', emu] if emu else args
+
+
 def _fallback(args: list[str]) -> list[str]:
     if '-emulator' in args or '-system' not in args:
         return args
@@ -61,6 +81,13 @@ def _fallback(args: list[str]) -> list[str]:
                     if core:
                         print(f'acrobato: {emulator} is not installed, using RetroArch core {core}', file=sys.stderr)
                         return args + ['-emulator', 'libretro', '-core', core]
+            # no RetroArch core (Switch, Switch 2, PS5): another installed emulator for this system
+            for emu in s.iter('emulator'):
+                name = emu.get('name')
+                if name in installed:
+                    core = next((c.text for c in emu.iter('core')), name)
+                    print(f'acrobato: {emulator} is not installed, using {name}', file=sys.stderr)
+                    return args + ['-emulator', name, '-core', core]
     return args
 
 
@@ -194,7 +221,7 @@ def _players(args: list[str]) -> list[str]:
 def main() -> int:
     args = sys.argv[1:]
     try:
-        args = _fallback(args)
+        args = _fallback(_emulator_window(args))
     except Exception as e:  # never block a launch because of this check
         print(f'acrobato: emulator check skipped: {e}', file=sys.stderr)
     try:

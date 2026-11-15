@@ -72,6 +72,36 @@
       "description": "Dreamcast, Naomi and Atomiswave emulator",
       "source": {"type": "github", "repo": "flyinghead/flycast", "release": "latest", "asset": "^flycast-x86_64.*\\.AppImage$"},
       "install": "/usr/bin/flycast"
+    },
+    {
+      "id": "eden", "name": "Eden", "group": "EMULATORS",
+      "description": "Nintendo Switch emulator",
+      "source": {"type": "gitea", "server": "https://git.eden-emu.dev", "repo": "eden-emu/eden", "release": "latest", "asset": "^Eden-Linux-.*-amd64-gcc-standard\\.AppImage$"},
+      "install": "/usr/bin/eden", "systems": ["switch"]
+    },
+    {
+      "id": "ryujinx", "name": "Ryujinx", "group": "EMULATORS",
+      "description": "Nintendo Switch emulator, Ryubing (installed from Flathub)",
+      "source": {"type": "flatpak", "ref": "io.github.ryubing.Ryujinx", "remote": "flathub"},
+      "install": "/usr/bin/ryujinx", "systems": ["switch"]
+    },
+    {
+      "id": "eglantine", "name": "Eglantine", "group": "EMULATORS",
+      "description": "Nintendo Switch 2 emulator (very experimental)",
+      "source": {"type": "gitea", "server": "https://git.eden-emu.dev", "repo": "Franseven/PokeDinner-a-Eglantine-Fork", "release": "recent", "asset": "-linux-x86_64\\.AppImage$"},
+      "install": "/usr/bin/eglantine", "systems": ["switch2"]
+    },
+    {
+      "id": "lichii", "name": "Lichii", "group": "EMULATORS",
+      "description": "Nintendo Switch and Switch 2 emulator (very experimental)",
+      "source": {"type": "github", "repo": "zortos293/Lichii", "release": "latest", "asset": "^lichii-linux-x86_64\\.AppImage$"},
+      "install": "/usr/bin/lichii", "systems": ["switch", "switch2"]
+    },
+    {
+      "id": "kyty", "name": "KytyPS5", "group": "EMULATORS",
+      "description": "PlayStation 5 emulator (very experimental)",
+      "source": {"type": "github", "repo": "KytyPS5/KytyPS5", "release": "latest", "asset": "-Linux-x86_64\\.tar\\.gz$", "archive": "tar.gz", "exe": "kyty_emulator"},
+      "install": "/usr/bin/kyty", "systems": ["ps5"]
     }
   ]
 }

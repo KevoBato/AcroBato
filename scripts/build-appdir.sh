@@ -103,9 +103,11 @@ LAUNCH_PKGS=(python-batocera-common batocera-launch batocera-launch-libretro bat
 # need glibc 2.36 and broke the launcher on Ubuntu 22.04 (our baseline, glibc 2.35).
 # No pip cache: the home folder is shared with the build host, whose cached evdev was built
 # by a newer compiler (same problem).
+rm -rf "$HERE/packaging/systems/build" "$HERE"/packaging/systems/*.egg-info   # setuptools reuses stale builds
 CC="gcc -pthread" LDSHARED="gcc -pthread -shared" "$PY" -m pip install -q --no-warn-script-location \
   --ignore-requires-python --no-binary evdev --no-cache-dir \
-  "$BL/$HK" $(for p in "${LAUNCH_PKGS[@]}"; do echo "$BL/python-src/$p"; done)
+  "$BL/$HK" $(for p in "${LAUNCH_PKGS[@]}"; do echo "$BL/python-src/$p"; done) \
+  "$HERE/packaging/systems"   # AcroBato's Switch / Switch 2 / PS5 emulators (acrobato_emulators)
 find "$A/usr/python" -name '__pycache__' -prune -exec rm -rf {} +
 P="$A/usr/python/lib"
 rm -rf "$P"/python3.14/{test,idlelib,tkinter,turtledemo,ensurepip,lib2to3,config-3.14-*} \
@@ -131,7 +133,7 @@ mkwrap hotkeygen hotkeygen.hotkeygen:main
 mkwrap batocera-hotkeys hotkeygen.batocera_hotkeys:main
 # controller combos (Hotkey+Start to quit, ...) -> hotkeygen; started per game by batocera-launch
 bash "$HERE/scripts/stage-evmapy.sh" "$BL" "$("$PY" -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
-cp "$HERE/compat/bin/batocera-evmapy" "$HERE/compat/bin/acrobato-emukill" "$A/usr/bin/"
+cp "$HERE/compat/bin/batocera-evmapy" "$HERE/compat/bin/acrobato-emukill" "$HERE/compat/bin/acrobato-watchdog" "$A/usr/bin/"
 
 # --- data: launcher defaults, shaders, hotkeygen config, system list ---
 bash "$HERE/scripts/stage-launcher-data.sh" "$BL" "$A/usr/share" "$A/etc"
@@ -140,6 +142,7 @@ CORES="$(ls "$DEPS"/libretro/cores/*_libretro.so 2>/dev/null | xargs -rn1 basena
 export CORES
 bash "$HERE/scripts/gen-es-data.sh" "$BL" "$PY" "$A/usr/share"
 "$PY" "$HERE/scripts/fix-defaults.py" "$A/usr/share"   # defaults -> bundled cores / downloadable emulators
+"$PY" "$HERE/packaging/systems/add-systems.py" "$A/usr/share"   # Switch, Switch 2, PS5 (not in Batocera)
 "$PY" -m pip uninstall -q -y batocera-es-system   # build-time only
 "$PY" -m pip uninstall -q -y pip
 find "$A/usr/python" -name '__pycache__' -prune -exec rm -rf {} +
