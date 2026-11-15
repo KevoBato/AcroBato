@@ -236,38 +236,67 @@ def nx_stick(guid: str, port: int, x, y) -> str:
             f'port:{port},axis_y:{y.id},offset_y:0.000000,invert_x:+"')
 
 
-def apply_controls(qt_config: Path, controllers) -> None:
-    """Map the players' controllers in qt-config.ini, as the emulator's own controller setup
-    would (Pro Controller, SDL). Without this, games start with no controller mapped."""
-    ini = QtIni(qt_config)
+def wanted_controls(controllers) -> dict[str, str]:
+    """[Controls] keys for the players' controllers, as the emulator's own controller setup
+    would write them (Pro Controller, SDL bindings)."""
+    out: dict[str, str] = {}
     players = sorted((c for c in controllers or [] if c is not None and c.type == 'joystick'),
                      key=lambda c: c.player_number)[:8]
     seen: dict[str, int] = {}
     for n in range(8):
         if n >= len(players):
-            ini.set('Controls', f'player_{n}_connected', 'false', 'false')
+            out[f'player_{n}_connected'] = 'false'
             continue
         c = players[n]
         port = seen.get(c.guid, 0)
         seen[c.guid] = port + 1
         inputs = c.inputs
-        ini.set('Controls', f'player_{n}_type', '0', 'false')
-        ini.set('Controls', f'player_{n}_connected', 'true', 'false')
+        out[f'player_{n}_type'] = '0'
+        out[f'player_{n}_connected'] = 'true'
         for key, es_name in NX_BUTTONS.items():
             if es_name in inputs:
-                ini.set('Controls', f'player_{n}_{key}', nx_binding(c.guid, port, inputs[es_name]), 'false')
+                out[f'player_{n}_{key}'] = nx_binding(c.guid, port, inputs[es_name])
         # Home: the hotkey button when it's a button of its own. Steam's virtual pads use Select
         # as hotkey (Steam keeps the Steam/Guide button), but still report Guide as button 8.
         hotkey, select = inputs.get('hotkey'), inputs.get('select')
         if hotkey and not (select and (hotkey.type, hotkey.id) == (select.type, select.id)):
-            ini.set('Controls', f'player_{n}_button_home', nx_binding(c.guid, port, hotkey), 'false')
+            out[f'player_{n}_button_home'] = nx_binding(c.guid, port, hotkey)
         elif c.guid[8:20] == 'de280000ff11':  # Steam virtual gamepad (28de:11ff)
-            ini.set('Controls', f'player_{n}_button_home',
-                    f'"engine:sdl,guid:{c.guid},port:{port},button:8"', 'false')
+            out[f'player_{n}_button_home'] = f'"engine:sdl,guid:{c.guid},port:{port},button:8"'
         for stick, (xs, ys) in (('lstick', ('joystick1left', 'joystick1up')), ('rstick', ('joystick2left', 'joystick2up'))):
             if xs in inputs and ys in inputs:
-                ini.set('Controls', f'player_{n}_{stick}', nx_stick(c.guid, port, inputs[xs], inputs[ys]), 'false')
-    ini.save()
+                out[f'player_{n}_{stick}'] = nx_stick(c.guid, port, inputs[xs], inputs[ys])
+    return out
+
+
+def apply_controls(qt_config: Path, state_file: Path, controllers) -> None:
+    """Map the players' controllers so games work without setting controls first, while
+    anything the user sets in the emulator's own controls window wins.
+
+    A control is written only when it's unset (or on the emulator's default), or still holds
+    exactly what AcroBato wrote last time. Once the user changes it in the emulator, it differs
+    and is left alone from then on; "Restore defaults" there hands it back to AcroBato.
+    Per-game controls set in the emulator live in its per-game files and are never touched."""
+    try:
+        state = json.loads(state_file.read_text())
+    except (OSError, ValueError):
+        state = {}
+    ini, changed = QtIni(qt_config), False
+    for key, value in wanted_controls(controllers).items():
+        cur = ini.get('Controls', key)
+        ours = state.get(key)
+        free = cur is None or cur[1] == 'true' or cur[0] in ('', '[empty]')
+        if free or (ours is not None and cur[0] == ours):
+            if cur is None or cur[0] != value:  # already right: leave the line as it is
+                ini.set('Controls', key, value, 'false')
+                changed = True
+            state[key] = value
+        else:
+            state.pop(key, None)  # the user's own setting
+    if changed:
+        ini.save()
+    state_file.parent.mkdir(parents=True, exist_ok=True)
+    state_file.write_text(json.dumps(state))
 
 
 # --- emulators ----------------------------------------------------------------------------------
@@ -341,7 +370,8 @@ class _EdenFamily(_Standalone):
                          self.config_home / 'acrobato-es-options.json', self.system, game)
         if not game:
             return Command([exe], env=env)
-        apply_controls(self.config_home / self.profile / 'qt-config.ini', self.controllers)
+        apply_controls(self.config_home / self.profile / 'qt-config.ini',
+                       self.config_home / 'acrobato-controls.json', self.controllers)
         # acrobato-watchdog closes the emulator before it runs the machine out of memory
         return Command(['acrobato-watchdog', exe, '-f', '-g', self.game_file()], env=env)
 
