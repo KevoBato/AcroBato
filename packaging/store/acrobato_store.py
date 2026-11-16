@@ -151,7 +151,9 @@ def cmd_list() -> None:
             desc += f" (installed: {state[e['id']].get('version', '?')})"
         out.append('  <package>')
         for tag, val in (('name', e['name']), ('description', desc), ('group', e.get('group', 'EMULATORS')),
-                         ('repository', 'Emulators'), ('arch', 'x86_64'),
+                         # ES makes one tab per repository (sorted by name): emulators, then cores
+                         ('repository', 'RetroArch Cores' if e['source']['type'] == 'libretro' else 'Emulators'),
+                         ('arch', 'x86_64'),
                          ('available_version', info.get('version', '')),
                          ('download_size', str(info.get('size', 0) // 1024)),  # ES expects KB
                          ('url', f"{e['source'].get('server', 'https://github.com')}/{e['source']['repo']}"
