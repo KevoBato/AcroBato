@@ -44,6 +44,13 @@ for t in cabextract unzip squashfuse fuse-overlayfs; do
   patchelf --set-rpath '$ORIGIN/../lib' "$A/usr/bin/$t"
 done
 
+# ffprobe (minimal FFmpeg build): Batocera's Hypseus Singe launcher runs it
+if [ -x "$DEPS/ffmpeg/bin/ffprobe" ]; then
+  cp -L "$DEPS/ffmpeg/bin/ffprobe" "$A/usr/bin/"
+  bundle_deps "$A/usr/bin/ffprobe"
+  patchelf --set-rpath '$ORIGIN/../lib' "$A/usr/bin/ffprobe"
+fi
+
 # --- EmulationStation ---
 cp "$ES_SRC/emulationstation" "$A/usr/bin/"
 strip "$A/usr/bin/emulationstation"
@@ -124,7 +131,8 @@ git -C "$BL" checkout -q -- python-src $HK
 python3 "$HERE/scripts/relocate-launcher.py" "$BL/python-src" "$BL/$HK" | grep -E 'tweak|WARN|rewrote'
 LAUNCH_PKGS=(python-batocera-common batocera-launch batocera-launch-libretro batocera-launch-libretro-mame
              batocera-launch-mame-common batocera-launch-mame batocera-launch-dolphin batocera-launch-pcsx2
-             batocera-launch-rpcs3 batocera-launch-flycast)
+             batocera-launch-rpcs3 batocera-launch-flycast batocera-launch-xemu-chihiro
+             batocera-launch-linuxloader)
 # batocera-bezel-overlay (GTK bezels over standalone emulators) needs PyGObject: later.
 # evdev from source with this system's gcc: PyPI's prebuilt evdev uses RELR relocations, which
 # need glibc 2.36 and broke the launcher on Ubuntu 22.04 (our baseline, glibc 2.35).

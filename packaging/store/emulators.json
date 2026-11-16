@@ -110,6 +110,92 @@
       "install": "/usr/bin/windows-arcade-loader", "systems": ["typex"]
     },
     {
+      "id": "linuxloader", "name": "Linux Loader (Lindbergh)", "group": "EMULATORS",
+      "description": "Sega Lindbergh arcade games (needs the 32-bit system libraries Steam installs)",
+      "_note": "official AppImage, used unpacked at Batocera's /usr/bin/linuxloader layout: the program behind a wrapper that sets the AppImage's 32-bit library path",
+      "source": {"type": "github", "repo": "lindbergh-loader/linuxloader", "release": "latest", "asset": "^linuxloader\\.AppImage$",
+                 "archive": "appimage", "exe": "usr/bin/linuxloader",
+                 "env": {"LD_LIBRARY_PATH": "$ROOT/usr/lib32:$LD_LIBRARY_PATH",
+                         "VK_ICD_FILENAMES": "$ROOT/usr/share/vulkan/icd.d/intel_hasvk_icd.i686.json:$ROOT/usr/share/vulkan/icd.d/intel_icd.i686.json:$ROOT/usr/share/vulkan/icd.d/lvp_icd.i686.json:$ROOT/usr/share/vulkan/icd.d/radeon_icd.i686.json:$ROOT/usr/share/vulkan/icd.d/virtio_icd.i686.json"}},
+      "install": "/usr/bin/linuxloader/linuxloader",
+      "files": [
+        {"from": "usr/lib32/linuxloader.so", "install": "/usr/bin/linuxloader/linuxloader.so"}
+      ],
+      "extras": [
+        {"url": "https://raw.githubusercontent.com/batocera-linux/batocera.linux/23d3fcfea8a9a31b045d188ea39806ef01251efb/package/batocera/emulators/linuxloader/linuxloader.ini",
+         "install": "/usr/bin/linuxloader/linuxloader.ini", "sha256": "6a75ff957bf3df6c4b5409a6bf7295efd428896c86933e49d785036223587195"},
+        {"url": "https://raw.githubusercontent.com/batocera-linux/batocera.linux/23d3fcfea8a9a31b045d188ea39806ef01251efb/package/batocera/emulators/linuxloader/controls.ini",
+         "install": "/usr/bin/linuxloader/controls.ini", "sha256": "87413b3da111279a1a5731b9e92f4d20d1ef83b3764302f272bb767a9d894cf1"}
+      ]
+    },
+    {
+      "id": "supermodel", "name": "Supermodel", "group": "EMULATORS",
+      "description": "Sega Model 3 arcade emulator",
+      "source": {"type": "github", "repo": "trzy/Supermodel", "release": "latest", "asset": "-linux\\.tar\\.gz$", "archive": "tar.gz", "exe": "supermodel"},
+      "install": "/usr/bin/supermodel",
+      "files": [
+        {"from": "Config/Games.xml", "install": "/usr/share/supermodel/Games.xml"},
+        {"from": "Assets", "install": "/usr/share/supermodel/Assets"},
+        {"from": "NVRAM", "install": "/usr/share/supermodel/NVRAM"}
+      ],
+      "extras": [
+        {"url": "https://raw.githubusercontent.com/batocera-linux/batocera.linux/23d3fcfea8a9a31b045d188ea39806ef01251efb/package/batocera/emulators/supermodel/Supermodel.ini.template",
+         "install": "/usr/share/supermodel/Supermodel.ini.template", "sha256": "adeac0c1215bb3897a993fcb90e9f14a80f90dffad08886142f31be74fa8eda4"}
+      ]
+    },
+    {
+      "id": "hypseus-singe", "name": "Hypseus Singe", "group": "EMULATORS",
+      "description": "Laserdisc arcade games: Daphne (Dragon's Lair, Space Ace...) and Singe",
+      "source": {"type": "github", "repo": "DirtBagXon/hypseus-singe", "release": "latest", "asset": "_AppImage\\.tar\\.gz$", "archive": "tar.gz", "exe": "Hypseus_Singe-x86_64.AppImage"},
+      "install": "/usr/bin/hypseus",
+      "mkdir": ["/usr/share/hypseus-singe/bezels"],
+      "extras": [
+        {"url": "https://github.com/DirtBagXon/hypseus-singe/archive/refs/tags/v3.0.2.tar.gz",
+         "sha256": "75bed6db3563d5187718fbee6c41d4f6a6506ad24a23e4659573058448d09688", "strip": 1,
+         "install": "/usr/share/hypseus-singe",
+         "extract": {"pics": "pics", "fonts": "fonts", "sound": "sound", "doc/hypinput.ini": "hypinput.ini", "doc/hypinput_gamepad.ini": "hypinput_gamepad.ini"}}
+      ]
+    },
+    {
+      "id": "sm2-emu", "name": "Keisho (sm2-emu)", "group": "EMULATORS",
+      "description": "Sega Model 1 and Model 2 arcade emulator",
+      "source": {"type": "github", "repo": "dmanlfc/sm2-emu", "release": "latest", "asset": "^keisho-x86_64\\.AppImage$"},
+      "install": "/usr/bin/sm2-emu",
+      "extras": [
+        {"url": "https://raw.githubusercontent.com/batocera-linux/batocera.linux/23d3fcfea8a9a31b045d188ea39806ef01251efb/package/batocera/emulators/sm2-emu/nvram.tar.xz",
+         "sha256": "1185c03338cd3f03ceb3b28af8034ef0fd38d49c872346ed0e37f5e3833d465a",
+         "install": "/usr/share/sm2-emu/nvram", "extract": {".": "."}}
+      ]
+    },
+    {
+      "id": "odin", "name": "Odin", "group": "EMULATORS",
+      "description": "Sega Hikaru arcade emulator (also Gaelco)",
+      "source": {"type": "github", "repo": "Tovarichtch/Odin", "release": "latest", "asset": "^odin-x86_64\\.AppImage$"},
+      "install": "/usr/bin/odin",
+      "extras": [
+        {"url": "https://raw.githubusercontent.com/batocera-linux/batocera.linux/23d3fcfea8a9a31b045d188ea39806ef01251efb/package/batocera/emulators/odin/nvram.tar.xz",
+         "sha256": "bb00fc98e75394d6f58d587d3ea400b30da42a388e5478c55d1452c1ea356618",
+         "install": "/usr/share/odin/nvram", "extract": {".": "."}}
+      ]
+    },
+    {
+      "id": "xemu-chihiro", "name": "xemu Chihiro", "group": "EMULATORS",
+      "description": "Sega Chihiro arcade emulator (xemu fork, experimental)",
+      "source": {"type": "github", "repo": "Tovarichtch/xemu", "release": "recent", "asset": "x86_64\\.AppImage$"},
+      "install": "/usr/bin/xemu-chihiro"
+    },
+    {
+      "id": "pcsx2x6", "name": "PCSX2x6", "group": "EMULATORS",
+      "description": "Namco System 246/256 arcade emulator (PCSX2 fork)",
+      "source": {"type": "github", "repo": "PS2Homebrew-arcade/pcsx2x6", "release": "latest", "asset": "-linux-appimage-x64-Qt\\.AppImage$"},
+      "install": "/usr/pcsx2x6/bin/pcsx2x6-qt",
+      "_extras": "game patches the launcher copies into pcsx2x6's folder (Batocera's pcsx2x6.mk downloads the same)",
+      "extras": [
+        {"github": {"repo": "PS2Homebrew-arcade/pcsx2x6_patches", "release": "tags/latest", "asset": "^patches\\.zip$"},
+         "install": "/usr/share/batocera/datainit/bios/namco2x6/patches.zip"}
+      ]
+    },
+    {
       "id": "lr-mame", "name": "MAME (RetroArch core)", "group": "RETROARCH CORES",
       "description": "Arcade: MAME, Namco System 22, CAVE CV1000, Gaelco, Sega Model 1/2/3 (large: 111 MB download, 400 MB installed)",
       "source": {"type": "libretro", "core": "mame"},

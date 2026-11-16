@@ -50,8 +50,10 @@ def relocate(path: str, /) -> Path:
     """Map a Batocera system path onto the relocated layout (see _RELOCATIONS).
 
     An env var may list several folders separated by ':' (like PATH); for
-    read-only prefixes the first one containing the file wins, otherwise the
-    host path is kept.
+    read-only prefixes the first one containing the file wins. A /usr/... path
+    not found under its own prefix's folders is then looked up in the
+    downloaded emulators' tree (ES_USR, e.g. /usr/share/supermodel from the
+    Content Downloader); otherwise the host path is kept.
     """
     for prefix, env, only_if_exists in _RELOCATIONS:
         if path == prefix or path.startswith(prefix + '/'):
@@ -59,7 +61,8 @@ def relocate(path: str, /) -> Path:
                 candidate = Path(base + path[len(prefix):])
                 if not only_if_exists or candidate.exists():
                     return candidate
-            break
+            if not only_if_exists or not path.startswith('/usr/'):
+                break
     return Path(path)
 # --- end relocatable paths ---
 '''
@@ -312,7 +315,11 @@ def main() -> int:
         'hotkeygen/daemon.py',
         "        if (keys := self.context['keys'].get(hotkey)) is None:\n            return None\n",
         "        if (keys := self.context['keys'].get(hotkey)) is None:\n            return None\n\n"
-        "        if hotkey == 'exit' and isinstance(keys, list) and {ecodes.ecodes.get(k, k) if isinstance(k, str) else k for k in keys} == {ecodes.KEY_LEFTALT, ecodes.KEY_F4}:\n"
+        # (also any other exit key combination of a standalone emulator, e.g. xemu's Ctrl+Q:
+        # typed keys only reach a focused window, which Game Mode doesn't guarantee)
+        # (keys arrive over D-Bus as key codes: a list, a single number, or a shell command string)
+        "        if hotkey == 'exit' and self.context.get('name') != 'retroarch' and (\n"
+        "                not isinstance(keys, str) or keys.startswith('KEY_')):\n"
         "            keys = 'acrobato-emukill'\n",
     )
 
@@ -354,6 +361,30 @@ def main() -> int:
         'batocera_launch_libretro/core.py',
         "        return _RETROARCH_CORES_DIR / f'{self.library_prefix}_libretro.so'\n",
         "        return relocate(f'/usr/lib/libretro/{self.library_prefix}_libretro.so')\n",
+    )
+
+    # pcsx2x6 (Namco System 246/256) runs a hardcoded /usr/pcsx2x6/bin path: the Content
+    # Downloader's copy instead
+    tweak(
+        roots,
+        'batocera_launch/emulators/pcsx2x6.py',
+        "['/usr/pcsx2x6/bin/pcsx2x6-qt']",
+        "[str(relocate('/usr/pcsx2x6/bin/pcsx2x6-qt'))]",
+    )
+    tweak(
+        roots,
+        'batocera_launch/emulators/pcsx2x6.py',
+        "['/usr/pcsx2x6/bin/pcsx2x6-qt', '-nogui', self.rom]",
+        "[str(relocate('/usr/pcsx2x6/bin/pcsx2x6-qt')), '-nogui', self.rom]",
+    )
+
+    # pcsx2x6's game patches come with it from the Content Downloader (Batocera puts them in
+    # its default BIOS files, inside the AppImage here)
+    tweak(
+        roots,
+        'batocera_launch/emulators/pcsx2x6.py',
+        "DATAINIT_DIR / 'bios' / 'namco2x6' / 'patches.zip'",
+        "relocate('/usr/share/batocera/datainit/bios/namco2x6/patches.zip')",
     )
 
     # 4. report plain-string paths that still need a manual look

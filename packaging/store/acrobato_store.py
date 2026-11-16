@@ -219,9 +219,33 @@ def install_github(e: dict) -> str:
             exe.chmod(0o755)
             rel = os.path.relpath(exe, target(e).parent)
             # run from its own folder: some programs look for their files next to themselves
+            appimage_env = ('unset APPDIR APPIMAGE ARGV0 OWD\n'
+                            'if ! command -v fusermount3 >/dev/null 2>&1 && ! command -v fusermount >/dev/null 2>&1; then\n'
+                            '  export APPIMAGE_EXTRACT_AND_RUN=1\n'
+                            'fi\n') if exe.name.endswith('.AppImage') else ''
             write_launcher(target(e), (
-                f'EXE="$(dirname "$(readlink -f "$0")")/{rel}"\n'
+                f'EXE="$(dirname "$(readlink -f "$0")")/{rel}"\n' + appimage_env +
                 'cd "$(dirname "$EXE")" && exec "$EXE" "$@"\n'))
+            return info['version']
+        if e['source'].get('archive') == 'appimage':
+            # an AppImage used unpacked (its program run directly, e.g. a 32-bit one whose
+            # launcher sets library paths, like linuxloader): "exe" inside it, "env" as its
+            # AppRun sets ($ROOT = the unpacked AppImage)
+            say('Extracting')
+            dl.chmod(0o755)
+            subprocess.run([str(dl), '--appimage-extract'], cwd=tmp, check=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if app_dir.exists():
+                shutil.rmtree(app_dir)
+            shutil.move(Path(tmp) / 'squashfs-root', app_dir)
+            exe = app_dir / e['source']['exe']
+            if not exe.is_file():
+                raise RuntimeError(f"the AppImage does not contain {e['source']['exe']}")
+            rel = os.path.relpath(app_dir, target(e).parent)
+            env = ''.join(f'export {k}="{v}"\n' for k, v in e['source'].get('env', {}).items())
+            write_launcher(target(e), (
+                f'ROOT="$(dirname "$(readlink -f "$0")")/{rel}"\n' + env +
+                f'exec "$ROOT/{e["source"]["exe"]}" "$@"\n'))
             return info['version']
         if 'member' in e['source']:  # AppImage inside a zip
             with zipfile.ZipFile(dl) as z:
@@ -279,15 +303,91 @@ def install_libretro(e: dict) -> str:
     return info['version']
 
 
+def usr_path(p: str) -> Path:
+    return USR / p.removeprefix('/usr/')
+
+
+def put(src: Path, dest: Path) -> None:
+    """Copy a file or folder to dest, replacing what's there."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    elif dest.exists() or dest.is_symlink():
+        dest.unlink()
+    if src.is_dir():
+        shutil.copytree(src, dest, symlinks=True)
+    else:
+        shutil.copy2(src, dest)
+
+
+def install_files(e: dict) -> None:
+    """Data files from the emulator's own download, where Batocera's launcher expects them
+    ("files": [{"from": <path in the unpacked download>, "install": "/usr/share/..."}]), and
+    empty folders it expects ("mkdir": ["/usr/share/..."])."""
+    for d in e.get('mkdir', []):
+        usr_path(d).mkdir(parents=True, exist_ok=True)
+    for f in e.get('files', []):
+        src = APPS / e['id'] / f['from']
+        if not src.exists():
+            raise RuntimeError(f"the download has no {f['from']}")
+        put(src, usr_path(f['install']))
+
+
 def install_extras(e: dict) -> None:
-    """Files an emulator needs besides its own download (e.g. MAME's plugins), pinned by
-    SHA-256 in the catalog."""
+    """Files an emulator needs besides its own download (MAME's plugins, Batocera's data for the
+    emulator...), pinned by SHA-256 in the catalog. With "extract" ({path in the archive:
+    path under "install"}), the download is a .tar.* archive and those parts of it are used;
+    "strip" drops leading folders of the archive's paths (1 for GitHub source archives)."""
+    import tarfile
     for x in e.get('extras', []):
-        dest = USR / x['install'].removeprefix('/usr/')
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        tmp = dest.with_name(dest.name + '.part')
-        download(x['url'], tmp, dest.name, 0, f"sha256:{x['sha256']}")
-        tmp.replace(dest)
+        dest = usr_path(x['install'])
+        if 'github' in x:  # a file of a GitHub release, checked against GitHub's own SHA-256
+            info = github_release({'type': 'github', **x['github']})
+            url, digest = info['url'], info['digest']
+            if not digest.startswith('sha256:'):
+                raise RuntimeError(f"no checksum published for {info['asset']}")
+        else:
+            url, digest = x['url'], f"sha256:{x['sha256']}"
+        if 'extract' not in x:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            tmp = dest.with_name(dest.name + '.part')
+            download(url, tmp, dest.name, 0, digest)
+            tmp.replace(dest)
+            continue
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            arc = Path(tmp) / 'archive'
+            download(url, arc, url.rsplit('/', 1)[-1], 0, digest)
+            out = Path(tmp) / 'x'
+            with tarfile.open(arc) as t:
+                t.extractall(out, filter='data')
+            root = out
+            for _ in range(x.get('strip', 0)):
+                (only,) = list(root.iterdir())
+                root = only
+            for src, rel in x['extract'].items():
+                s = root / src if src not in ('', '.') else root
+                if not s.exists():
+                    raise RuntimeError(f'{src} is not in {x["url"]}')
+                d = dest / rel if rel not in ('', '.') else dest
+                if s.is_dir() and d == dest:
+                    dest.mkdir(parents=True, exist_ok=True)
+                    for item in s.iterdir():
+                        put(item, dest / item.name)
+                else:
+                    put(s, d)
+
+
+def installed_paths(e: dict) -> list[Path]:
+    """Everything the install put outside the emulator's own folder (removed with it)."""
+    paths = [usr_path(f['install']) for f in e.get('files', [])] + [usr_path(d) for d in e.get('mkdir', [])]
+    for x in e.get('extras', []):
+        if 'extract' not in x:
+            paths.append(usr_path(x['install']))
+        else:
+            paths += [usr_path(x['install']) / rel for rel in x['extract'].values() if rel not in ('', '.')]
+            if any(rel in ('', '.') for rel in x['extract'].values()):
+                paths.append(usr_path(x['install']))
+    return paths
 
 
 def install_flatpak(e: dict) -> str:
@@ -331,6 +431,7 @@ def cmd_install(name: str) -> None:
     kind = e['source']['type']
     version = (install_flatpak(e) if kind == 'flatpak' else install_libretro(e) if kind == 'libretro'
                else install_github(e))
+    install_files(e)
     install_extras(e)
     state = load(STATE, {})
     state[e['id']] = {'version': version, 'installed': time.strftime('%Y-%m-%d')}
@@ -352,8 +453,11 @@ def cmd_remove(name: str) -> None:
     for f in window_entries(e):
         f.unlink(missing_ok=True)
     target(e).unlink(missing_ok=True)
-    for x in e.get('extras', []):
-        (USR / x['install'].removeprefix('/usr/')).unlink(missing_ok=True)
+    for p in installed_paths(e):
+        if p.is_dir() and not p.is_symlink():
+            shutil.rmtree(p, ignore_errors=True)
+        else:
+            p.unlink(missing_ok=True)
     shutil.rmtree(APPS / e['id'], ignore_errors=True)
     if e['source']['type'] == 'flatpak' and shutil.which('flatpak'):
         say(f"Removing {e['name']} (Flatpak)")
