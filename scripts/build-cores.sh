@@ -54,6 +54,52 @@ opera           | .                            | Makefile          | opera_libre
 neocd           | .                            | Makefile          | neocd_libretro.so             |
 bluemsx         | .                            | Makefile.libretro | bluemsx_libretro.so           |
 puae            | .                            | Makefile          | puae_libretro.so              |
+# --- small/old systems (2026-11-16) ---
+vice            | .                            | Makefile          | vice_x64_libretro.so          | EMUTYPE=x64
+vice            | .                            | Makefile          | vice_xplus4_libretro.so       | EMUTYPE=xplus4
+vice            | .                            | Makefile          | vice_x128_libretro.so         | EMUTYPE=x128
+vice            | .                            | Makefile          | vice_xvic_libretro.so         | EMUTYPE=xvic
+vice            | .                            | Makefile          | vice_xpet_libretro.so         | EMUTYPE=xpet
+tgbdual         | .                            | Makefile          | tgbdual_libretro.so           |
+beetle-vb       | .                            | Makefile          | mednafen_vb_libretro.so       |
+gearsystem      | platforms/libretro           | Makefile          | gearsystem_libretro.so        |
+beetle-supergrafx| .                           | Makefile          | mednafen_supergrafx_libretro.so|
+beetle-pcfx     | .                            | Makefile          | mednafen_pcfx_libretro.so     |
+atari800        | .                            | Makefile          | atari800_libretro.so          |
+prboom          | .                            | Makefile          | prboom_libretro.so            |
+tyrquake        | .                            | Makefile          | tyrquake_libretro.so          |
+mrboom          | .                            | Makefile          | mrboom_libretro.so            |
+fake08          | platform/libretro            | Makefile          | fake08_libretro.so            |
+lowresnx        | platform/LibRetro            | Makefile          | lowresnx_libretro.so          |
+freechaf        | .                            | Makefile          | freechaf_libretro.so          |
+lutro           | .                            | Makefile          | lutro_libretro.so             |
+nxengine        | .                            | Makefile          | nxengine_libretro.so          |
+cap32           | .                            | Makefile          | cap32_libretro.so             |
+o2em            | .                            | Makefile          | o2em_libretro.so              |
+81              | .                            | Makefile          | 81_libretro.so                |
+fuse            | .                            | Makefile.libretro | fuse_libretro.so              |
+virtualjaguar   | .                            | Makefile          | virtualjaguar_libretro.so     |
+freeintv        | .                            | Makefile          | freeintv_libretro.so          |
+px68k           | .                            | Makefile.libretro | px68k_libretro.so             |
+xmil            | libretro                     | Makefile.libretro | x1_libretro.so                |
+pokemini        | .                            | Makefile          | pokemini_libretro.so          |
+theodore        | .                            | Makefile          | theodore_libretro.so          |
+pc88            | .                            | Makefile          | quasi88_libretro.so           |
+pc98            | sdl                          | Makefile.libretro | np2kai_libretro.so            |
+watara          | platform/libretro            | Makefile          | potator_libretro.so           |
+pd777           | source/libretro              | Makefile.libretro | pd777_libretro.so             |
+emuscv          | .                            | Makefile          | emuscv_libretro.so            |
+superbroswar    | .                            | Makefile.libretro | superbroswar_libretro.so      |
+zc210           | .                            | Makefile          | zc210_libretro.so             |
+vemulator       | .                            | Makefile          | vemulator_libretro.so         |
+xrick           | .                            | Makefile.libretro | xrick_libretro.so             |
+reminiscence    | .                            | Makefile          | reminiscence_libretro.so      |
+hatari          | .                            | CMAKE             | hatari_libretro.so            |
+tic80           | .                            | CMAKE             | tic80_libretro.so             |
+wasm4           | runtimes/native              | CMAKE             | wasm4_libretro.so             |
+vircon32        | .                            | CMAKE             | vircon32_libretro.so          |
+arduous         | .                            | CMAKE             | arduous_libretro.so           |
+bennugd         | .                            | CMAKE             | bennugd_libretro.so           |
 '
 
 # CMake options per core (from each recipe, desktop x86_64 branches chosen)
@@ -63,6 +109,10 @@ declare -A CMAKE_OPTS=(
   [ppsspp]="-DBUILD_SHARED_LIBS=OFF -DLIBRETRO=ON -DANDROID=OFF -DWIN32=OFF -DUSING_X11_VULKAN=ON -DUSE_DISCORD=OFF"
   [flycast]="-DBUILD_SHARED_LIBS=OFF -DLIBRETRO=ON -DUSE_OPENMP=ON -DBUILD_EXTERNAL=OFF -DUSE_DX9=OFF -DUSE_VULKAN=ON"
   [swanstation]="-DBUILD_SHARED_LIBS=FALSE -DUSE_WAYLAND=ON -DUSE_X11=ON -DUSE_GLX=ON -DUSE_EGL=ON"
+  [hatari]="-DENABLE_LIBRETRO=ON -DENABLE_HATARI=OFF -DENABLE_TOOLS=OFF"
+  [tic80]="-DBUILD_LIBRETRO=ON -DBUILD_PLAYER=OFF -DBUILD_SOKOL=OFF -DBUILD_SDL=OFF -DBUILD_DEMO_CARTS=OFF -DBUILD_STATIC=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+  [vircon32]="-DENABLE_OPENGL=1"
+  [bennugd]="-DBUILD_SHARED_LIBS=OFF -DNO_SYSTEM_DEPENDENCIES=ON -Dlibretro_core=ON"
 )
 
 # compilers per core (default: the distro's GCC 11). Dolphin requires GCC 12; Ubuntu
@@ -86,10 +136,15 @@ while IFS='|' read -r pkg dir mkf so extra; do
            line = $0; sub(/^[^=]*= */, "", line)
            if (line ~ /\\$/) { sub(/\\$/, "", line); getline nxt; line = line nxt }
            print line; exit }' "$mk")
+  # (also written without spaces: "_SITE=https://...")
+  [ -z "$site" ] && site=$(sed -n "s/^${var}_SITE *= *//p" "$mk" | head -1)
   if [[ "$site" =~ github,([^,]+),([^,]+), ]]; then url="https://github.com/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}.git"
+  elif [[ "$site" =~ gitlab,([^,]+),([^,]+), ]]; then url="https://gitlab.com/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}.git"
   else url=$(echo "$site" | grep -oE 'https://[^ ]+' | head -1); fi
   # the name Batocera installs it under (what batocera-launch looks for)
-  inst=$(grep -oE '/usr/lib/libretro/[^ ]+_libretro\.so' "$mk" | head -1 | xargs -r basename)
+  # (a recipe installing several cores, e.g. VICE's one per machine: the row's own .so)
+  insts=$(grep -oE '/usr/lib/libretro/[^ ]+_libretro\.so' "$mk" | xargs -r -n1 basename)
+  if echo "$insts" | grep -qx "$so"; then inst=$so; else inst=$(echo "$insts" | head -1); fi
   inst=${inst:-$so}
   if [ -f "$OUT/cores/$inst" ] && [ "$(cat "$OUT/cores/$inst.version" 2>/dev/null)" = "$ver" ]; then ok+=("$pkg(cached)"); continue; fi
   echo ">>> $pkg $ver -> $inst"
@@ -98,12 +153,14 @@ while IFS='|' read -r pkg dir mkf so extra; do
     rm -rf "$d"; git init -q "$d"; git -C "$d" remote add origin "$url"
   fi
   # submodules only when the recipe asks for them (others are built from the plain source tree)
-  subs=no; grep -qE "^${var}_GIT_SUBMODULES *= *YES" "$mk" && subs=yes
+  subs=no; grep -qiE "^${var}_GIT_SUBMODULES *= *YES" "$mk" && subs=yes
   fetched=no
   for attempt in 1 2 3; do   # large submodules (e.g. PPSSPP's ffmpeg) sometimes stall
     if ( cd "$d" && G="git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=300" &&
          $G fetch -q --depth 1 origin "$ver" && git checkout -q -f FETCH_HEAD && git clean -qfdx &&
-         { [ "$subs" = no ] || $G submodule -q update --init --depth 1 --recursive; } ); then fetched=yes; break; fi
+         { [ "$subs" = no ] || $G submodule -q update --init --depth 1 --recursive; } &&
+         # some builds name their version with `git describe`, which needs a tag (shallow fetch has none)
+         { git describe --tags >/dev/null 2>&1 || git tag -f "acrobato-$ver" >/dev/null; } ); then fetched=yes; break; fi
     echo "    fetch attempt $attempt failed, retrying"
   done
   [ "$fetched" = yes ] || { failed+=("$pkg(fetch)"); continue; }

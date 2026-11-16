@@ -14,7 +14,10 @@ STANDALONE="pcsx2 dolphin-emu duckstation-common rpcs3 ppsspp cemu-common xemu a
   supermodel hypseus-singe sm2-emu odin xemu-chihiro pcsx2x6 linuxloader"
 # RetroArch cores bundled in the AppImage (build-cores.sh, last column of its table)
 CORES="${CORES:-fceumm nestopia snes9x genesisplusgx picodrive gambatte mgba pcsx_rearmed stella2014 handy mednafen_ngp mednafen_wswan pce_fast prosystem vecx
-  melonds desmume dolphin mupen64plus-next parallel_n64 ppsspp flycast swanstation fbneo beetle-saturn dosbox_pure opera neocd bluemsx puae}"
+  melonds desmume dolphin mupen64plus-next parallel_n64 ppsspp flycast swanstation fbneo beetle-saturn dosbox_pure opera neocd bluemsx puae
+  vice_x64 vice_xplus4 vice_x128 vice_xvic vice_xpet tgbdual vb gearsystem mednafen_supergrafx pcfx atari800 prboom tyrquake
+  mrboom fake08 lowresnx freechaf lutro nxengine cap32 o2em 81 fuse virtualjaguar freeintv px68k x1 pokemini theodore quasi88
+  np2kai potator pd777 emuscv superbroswar zc210 vemulator xrick reminiscence hatari tic80 wasm4 vircon32 arduous bennugd}"
 
 # RetroArch cores offered in the Content Downloader (packaging/store/emulators.json, source type
 # "libretro"): their systems are listed too. Also their variants (sega-arcade.mame for mame).

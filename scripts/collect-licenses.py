@@ -85,7 +85,11 @@ SPECIAL = {  # cores whose license is not in a top-level LICENSE/COPYING file
     'handy': ['lynx/license.txt'], 'stella2014': ['stella/license.txt'], 'fbneo': ['src/license.txt', 'LICENSE.md'],
     'parallel-n64': ['mupen64plus-rsp-cxd4/COPYING', 'gles2n64/src/COPYING',
                      'mupen64plus-video-paraLLEl/parallel-rdp/LICENSE'],
+    'tgbdual': ['docs/COPYING-2.0.txt'], 'atari800': ['atari800/COPYING'], 'nxengine': ['nxengine/LICENSE'],
+    'cap32': ['cap32/COPYING.txt'], 'hatari': ['gpl.txt'], 'bennugd': ['core/COPYING'],
 }
+# GPL-3.0 per the project (and Batocera's recipe) but no license file in the source: the GPL-3.0 text
+GPL3_NO_FILE = {'xrick', 'superbroswar', 'reminiscence'}
 NOTE = {
     'snes9x': 'Snes9x license (non-commercial)', 'genesisplusgx': 'Genesis Plus GX license (non-commercial)',
     'picodrive': 'MAME-style license (non-commercial)', 'fbneo': 'FBNeo license (non-commercial, no donations)',
@@ -93,14 +97,23 @@ NOTE = {
     'melonds': 'GPL-3.0', 'swanstation': 'GPL-3.0', 'vecx': 'GPL-3.0', 'neocd': 'LGPL-3.0',
     'bluemsx': 'BSD-style / GPL (per file)', 'dolphin': 'GPL-2.0-or-later (some parts other licenses)',
     'parallel-n64': 'GPL-2.0 (parts MIT)', 'ppsspp': 'GPL-2.0-or-later',
+    'gearsystem': 'GPL-3.0', 'lutro': 'MIT', 'fake08': 'MIT', 'lowresnx': 'zlib', 'xmil': 'BSD-3-Clause',
+    'pc88': 'BSD-3-Clause', 'pc98': 'MIT', 'wasm4': 'ISC', 'vircon32': 'BSD-3-Clause', 'o2em': 'Artistic License',
+    'pd777': 'MIT', 'bennugd': 'zlib', 'xrick': 'GPL-3.0 (no license file in the source; GPL-3.0 text included)',
+    'superbroswar': 'GPL-3.0 (no license file in the source; GPL-3.0 text included)',
+    'reminiscence': 'GPL-3.0 (no license file in the source; GPL-3.0 text included)',
+    'vice': 'GPL-2.0', 'hatari': 'GPL-2.0', 'virtualjaguar': 'GPL-3.0', 'fuse': 'GPL-3.0', '81': 'GPL-3.0',
+    'theodore': 'GPL-3.0', 'emuscv': 'GPL-3.0', 'vemulator': 'GPL-3.0', 'arduous': 'GPL-3.0', 'freechaf': 'GPL-3.0',
 }
 table = re.search(r"TABLE='(.*?)'", (HERE / 'scripts/build-cores.sh').read_text(), re.S).group(1)
+seen = set()
 for line in table.strip().splitlines():
     pkg = line.split('|')[0].strip()
     d = CORES / pkg
-    if not d.is_dir():
+    if line.lstrip().startswith('#') or pkg in seen or not d.is_dir():  # (VICE: one row per machine)
         continue
-    files =[d / p for p in SPECIAL.get(pkg, [])] or top_licenses(d)
+    seen.add(pkg)
+    files = [d / p for p in SPECIAL.get(pkg, [])] or top_licenses(d) or ([HERE / 'LICENSE'] if pkg in GPL3_NO_FILE else [])
     if pkg == 'opera':  # license is in the source file headers
         hdr = (d / 'libopera/opera_arm.c').read_text(errors='replace')
         m = re.search(r'/\*(.*?FreeDO licensed under.*?)\*/', hdr, re.S)

@@ -60,6 +60,47 @@ source repository.
 | neocd (RetroArch core) | 3118c69017 | LGPL-3.0 | libretro core source (neocd), see Batocera recipe | cores-neocd/LICENSE.md |
 | bluemsx (RetroArch core) | e3086eb5d3 | BSD-style / GPL (per file) | libretro core source (bluemsx), see Batocera recipe | cores-bluemsx/license.txt |
 | puae (RetroArch core) | 6536174a80 | GPL-2.0 | libretro core source (puae), see Batocera recipe | cores-puae/COPYING |
+| vice (RetroArch core) | c8c242db75 | GPL-2.0 | libretro core source (vice), see Batocera recipe | cores-vice/COPYING |
+| tgbdual (RetroArch core) | 0392c9c469 | GPL-2.0 | libretro core source (tgbdual), see Batocera recipe | cores-tgbdual/COPYING-2.0.txt |
+| beetle-vb (RetroArch core) | 83ed426086 | GPL-2.0 | libretro core source (beetle-vb), see Batocera recipe | cores-beetle-vb/COPYING |
+| gearsystem (RetroArch core) | 0e35ec681b | GPL-3.0 | libretro core source (gearsystem), see Batocera recipe | cores-gearsystem/LICENSE |
+| beetle-supergrafx (RetroArch core) | 3c6fcd3ded | GPL-2.0 | libretro core source (beetle-supergrafx), see Batocera recipe | cores-beetle-supergrafx/COPYING |
+| beetle-pcfx (RetroArch core) | c1650bad5f | GPL-2.0 | libretro core source (beetle-pcfx), see Batocera recipe | cores-beetle-pcfx/COPYING |
+| atari800 (RetroArch core) | 4e7fbc7376 | GPL-2.0 | libretro core source (atari800), see Batocera recipe | cores-atari800/COPYING |
+| prboom (RetroArch core) | c6e0fcb832 | GPL-2.0 | libretro core source (prboom), see Batocera recipe | cores-prboom/COPYING |
+| tyrquake (RetroArch core) | e57bb11597 | GPL-2.0 | libretro core source (tyrquake), see Batocera recipe | cores-tyrquake/LICENSE.txt |
+| mrboom (RetroArch core) | a7af125dc9 | see license file | libretro core source (mrboom), see Batocera recipe | cores-mrboom/LICENSE |
+| fake08 (RetroArch core) | 814991a257 | MIT | libretro core source (fake08), see Batocera recipe | cores-fake08/LICENSE.MD |
+| lowresnx (RetroArch core) | 35adc1a215 | zlib | libretro core source (lowresnx), see Batocera recipe | cores-lowresnx/LICENSE |
+| freechaf (RetroArch core) | 76c7a84f1f | GPL-3.0 | libretro core source (freechaf), see Batocera recipe | cores-freechaf/LICENSE |
+| lutro (RetroArch core) | 6224157a61 | MIT | libretro core source (lutro), see Batocera recipe | cores-lutro/LICENSE |
+| nxengine (RetroArch core) | fd1c0686f8 | see license file | libretro core source (nxengine), see Batocera recipe | cores-nxengine/LICENSE |
+| cap32 (RetroArch core) | e9ad1826aa | GPL-2.0 | libretro core source (cap32), see Batocera recipe | cores-cap32/COPYING.txt |
+| o2em (RetroArch core) | 679d6fec04 | Artistic License | libretro core source (o2em), see Batocera recipe | cores-o2em/COPYING |
+| 81 (RetroArch core) | fa7094910d | GPL-3.0 | libretro core source (81), see Batocera recipe | cores-81/LICENSE |
+| fuse (RetroArch core) | 958105a90a | GPL-3.0 | libretro core source (fuse), see Batocera recipe | cores-fuse/LICENSE |
+| virtualjaguar (RetroArch core) | f9a3c89f58 | GPL-3.0 | libretro core source (virtualjaguar), see Batocera recipe | cores-virtualjaguar/LICENSE |
+| freeintv (RetroArch core) | ef3e0fe322 | see license file | libretro core source (freeintv), see Batocera recipe | cores-freeintv/LICENSE |
+| px68k (RetroArch core) | 0ad84d7058 | GPL-2.0 | libretro core source (px68k), see Batocera recipe | cores-px68k/COPYING |
+| xmil (RetroArch core) | 3106aa54ff | BSD-3-Clause | libretro core source (xmil), see Batocera recipe | cores-xmil/LICENSE |
+| pokemini (RetroArch core) | 132111b763 | see license file | libretro core source (pokemini), see Batocera recipe | cores-pokemini/LICENSE |
+| theodore (RetroArch core) | 4d469ce0f7 | GPL-3.0 | libretro core source (theodore), see Batocera recipe | cores-theodore/LICENSE |
+| pc88 (RetroArch core) | 459bbc6e90 | BSD-3-Clause | libretro core source (pc88), see Batocera recipe | cores-pc88/LICENSE |
+| pc98 (RetroArch core) | 5939e0c6d5 | MIT | libretro core source (pc98), see Batocera recipe | cores-pc98/LICENSE |
+| watara (RetroArch core) | 227c5f6f3c | see license file | libretro core source (watara), see Batocera recipe | cores-watara/LICENSE |
+| pd777 (RetroArch core) | 331af5f53c | MIT | libretro core source (pd777), see Batocera recipe | cores-pd777/LICENSE |
+| emuscv (RetroArch core) | 1740711701 | GPL-3.0 | libretro core source (emuscv), see Batocera recipe | cores-emuscv/licence.txt |
+| superbroswar (RetroArch core) | 7f94e03163 | GPL-3.0 (no license file in the source; GPL-3.0 text included) | libretro core source (superbroswar), see Batocera recipe | cores-superbroswar/LICENSE |
+| zc210 (RetroArch core) | b6426da40b | see license file | libretro core source (zc210), see Batocera recipe | cores-zc210/license.txt |
+| vemulator (RetroArch core) | 27a062f6ae | GPL-3.0 | libretro core source (vemulator), see Batocera recipe | cores-vemulator/COPYING |
+| xrick (RetroArch core) | fcfde3623a | GPL-3.0 (no license file in the source; GPL-3.0 text included) | libretro core source (xrick), see Batocera recipe | cores-xrick/LICENSE |
+| reminiscence (RetroArch core) | e6c0b00392 | GPL-3.0 (no license file in the source; GPL-3.0 text included) | libretro core source (reminiscence), see Batocera recipe | cores-reminiscence/LICENSE |
+| hatari (RetroArch core) | 5831f66e05 | GPL-2.0 | libretro core source (hatari), see Batocera recipe | cores-hatari/gpl.txt |
+| tic80 (RetroArch core) | f98470a154 | see license file | libretro core source (tic80), see Batocera recipe | cores-tic80/LICENSE |
+| wasm4 (RetroArch core) | 92490f2616 | ISC | libretro core source (wasm4), see Batocera recipe | cores-wasm4/LICENSE.txt |
+| vircon32 (RetroArch core) | 99d81d98d1 | BSD-3-Clause | libretro core source (vircon32), see Batocera recipe | cores-vircon32/LICENSE.md |
+| arduous (RetroArch core) | 798e3950f1 | GPL-3.0 | libretro core source (arduous), see Batocera recipe | cores-arduous/COPYING |
+| bennugd (RetroArch core) | 5fba764ac7 | zlib | libretro core source (bennugd), see Batocera recipe | cores-bennugd/COPYING |
 | libretro core info files | eac3a2784d | MIT | https://github.com/libretro/libretro-core-info | libretro-core-info/COPYING |
 | Carbon-PixN theme for EmulationStation (Pixel Nostalgia; Carbon by Rookervik, based on "simple" by Nils Bonenberger) |  | GPL-3.0 | https://github.com/PixelNostalgia/Carbon-PixN | theme-carbon-pixn/LICENSE, theme-carbon-pixn/README.md |
 | RetroArch assets (menu icons, sounds) |  | CC-BY-4.0 | https://github.com/libretro/retroarch-assets | - |
@@ -78,10 +119,12 @@ source repository.
 | batocera-launch-flycast (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
 | batocera-launch-libretro (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
 | batocera-launch-libretro-mame (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
+| batocera-launch-linuxloader (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
 | batocera-launch-mame (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
 | batocera-launch-mame-common (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
 | batocera-launch-pcsx2 (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
 | batocera-launch-rpcs3 (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
+| batocera-launch-xemu-chihiro (Python package, part of Batocera) | 44.0 | LGPL-3.0-or-later | https://github.com/batocera-linux/batocera.linux | batocera/COPYING.LESSER, batocera/LICENSE-NOTICE |
 | brotli (Python package) | 1.2.1 | MIT | https://pypi.org/project/brotli | python-brotli/LICENSE |
 | cffi (Python package) | 2.1.1 | MIT-0 | https://pypi.org/project/cffi | python-cffi/LICENSE |
 | configobj (Python package) | 5.0.9 | BSD-3-Clause | https://pypi.org/project/configobj | python-configobj/LICENSE |
