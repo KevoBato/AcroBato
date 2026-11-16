@@ -100,6 +100,8 @@ THEME="$WORK/test/share/emulationstation/themes/es-theme-carbon"
 [ -d "$THEME" ] || git clone -q --depth 1 https://github.com/fabricecaruso/es-theme-carbon.git "$THEME"
 cp -r "$THEME" "$A/usr/share/emulationstation/themes/"
 rm -rf "$A/usr/share/emulationstation/themes/es-theme-carbon/.git"
+# AcroBato's additions to Carbon (art for systems it doesn't have: switch2 logo)
+cp -r "$HERE/packaging/theme/es-theme-carbon/." "$A/usr/share/emulationstation/themes/es-theme-carbon/"
 
 # --- Python + Batocera launcher ---
 mkdir -p "$A/usr/python"
