@@ -96,12 +96,24 @@ for n in range(8):
     root.append(c)
 tree.write(path, encoding='unicode', xml_declaration=True)
 PY
-THEME="$WORK/test/share/emulationstation/themes/es-theme-carbon"
-[ -d "$THEME" ] || git clone -q --depth 1 https://github.com/fabricecaruso/es-theme-carbon.git "$THEME"
-cp -r "$THEME" "$A/usr/share/emulationstation/themes/"
-rm -rf "$A/usr/share/emulationstation/themes/es-theme-carbon/.git"
-# AcroBato's additions to Carbon (art for systems it doesn't have: switch2 logo)
-cp -r "$HERE/packaging/theme/es-theme-carbon/." "$A/usr/share/emulationstation/themes/es-theme-carbon/"
+# Theme: Pixel Nostalgia's Carbon-PixN (GPL-3.0; Carbon with art for far more systems,
+# Batocera's arcade ones included), installed under Carbon's name. Trimmed to AcroBato's
+# systems further down (scripts/prune-theme.py), once es_systems.cfg is final.
+CARBON_REPO=https://github.com/PixelNostalgia/Carbon-PixN.git
+CARBON_REV=a68c196c1cec3b47e6aee572a9d79f65889e4e5f
+THEME="$WORK/test/share/emulationstation/themes/es-theme-carbon-pixn"
+[ -d "$THEME/.git" ] || git clone -q --filter=blob:none "$CARBON_REPO" "$THEME"
+git -C "$THEME" fetch -q origin "$CARBON_REV" 2>/dev/null || true
+git -C "$THEME" checkout -q "$CARBON_REV"
+T="$A/usr/share/emulationstation/themes/es-theme-carbon"
+mkdir -p "$T"
+git -C "$THEME" archive "$CARBON_REV" | tar -x -C "$T"
+# PixN's art named for its own build, not systems
+rm -f "$T"/art/logos/{pixn,pixn-bato,pixn-rb,batocera-pixn,pixel}.* "$T"/art/background/pixn*.jpg "$T"/art/consoles/pixn.png
+# its arcadepc logo is another project's (NOTParrot): AcroBato's own instead
+rm -f "$T"/art/logos/arcadepc*
+# AcroBato's additions: logos for systems Carbon-PixN has none for (packaging/theme/README.md)
+cp -r "$HERE/packaging/theme/es-theme-carbon/." "$T/"
 
 # --- Python + Batocera launcher ---
 mkdir -p "$A/usr/python"
@@ -157,6 +169,8 @@ export CORES
 bash "$HERE/scripts/gen-es-data.sh" "$BL" "$PY" "$A/usr/share"
 "$PY" "$HERE/scripts/fix-defaults.py" "$A/usr/share"   # defaults -> bundled cores / downloadable emulators
 "$PY" "$HERE/packaging/systems/add-systems.py" "$A/usr/share"   # Switch, Switch 2, PS5 (not in Batocera)
+"$PY" "$HERE/scripts/prune-theme.py" "$A/usr/share/emulationstation/themes/es-theme-carbon" \
+  "$A/usr/share/emulationstation/es_systems.cfg"
 "$PY" -m pip uninstall -q -y batocera-es-system   # build-time only
 "$PY" -m pip uninstall -q -y pip
 find "$A/usr/python" -name '__pycache__' -prune -exec rm -rf {} +

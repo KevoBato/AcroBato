@@ -95,7 +95,9 @@ and a RetroArch game launch.
 
 AcroBato is built on the work of the [Batocera](https://batocera.org) team (EmulationStation fork,
 launcher, controller database, recipes), [RetroArch / libretro](https://www.libretro.com) and the
-authors of every bundled emulator core. Inspired by [RetroBat](https://www.retrobat.org).
+authors of every bundled emulator core. The theme is [Pixel Nostalgia](https://github.com/PixelNostalgia)'s
+[Carbon-PixN](https://github.com/PixelNostalgia/Carbon-PixN) (GPL-3.0), based on Carbon by Rookervik.
+Inspired by [RetroBat](https://www.retrobat.org).
 AcroBato is not affiliated with or endorsed by these projects.
 
 AcroBato's own code (build scripts, patches, launcher integration, scrapers, downloader) is licensed

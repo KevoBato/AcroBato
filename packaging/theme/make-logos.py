@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""Make Carbon theme logos for AcroBato's systems that Carbon has no art for.
+"""Make Carbon logos for AcroBato's systems that the bundled theme (Carbon-PixN) has none for.
 
-Usage: make-logos.py <es-theme-carbon dir> <output art/logos dir>
+Usage: make-logos.py <Carbon or Carbon-PixN theme dir> <output art/logos dir>
 Needs fontTools (pip install fonttools). Run by hand when the logos change; the output SVGs are
 committed (packaging/theme/es-theme-carbon/art/logos/), so the build doesn't need fontTools.
 
 The logos are built from Carbon's own art, in its style:
-- switch2: Carbon's Switch logo with a "2" in the same red, height and stroke weight
-- ps5 / ps5-w: Carbon's PS4 logos with the "4" replaced by a "5" in the same thin style
 - arcade systems Pixel Nostalgia's Carbon-PixN has no logo for: the maker's Carbon logo (SEGA,
   ARCADE) with the system name, or a wordmark (Tsunami)
 Text is turned into paths (ES's SVG renderer, nanosvg, draws no <text>), in Cabin Bold: the
@@ -16,7 +14,6 @@ theme's own font (SIL Open Font License).
 Every SVG must render with ES's nanosvg: paths, groups and transforms only (no text, no <use>,
 no nested <svg>).
 """
-import math
 import re
 import sys
 from pathlib import Path
@@ -131,50 +128,7 @@ def wordmark(name: str, top: str, bottom: str, color: str, accent: str, cap: flo
     write(name, svg(w, h, body))
 
 
-def switch2() -> None:
-    """Carbon's Switch logo + a "2" (stroke 11, the SWITCH letters' box y 59..111)."""
-    s = (LOGOS / 'switch.svg').read_text(encoding='utf-8')
-    gi = s.rfind('<g style="font-style')  # the TM mark, moved after the 2
-    tm, body = s[gi:s.rfind('</svg>')], s[:gi]
-    sw = 11
-    h = sw / 2
-    l, r, t, b = 520 + h, 566 - h, 59 + h, 111 - h
-    rad = (r - l) / 2
-    cx, cy = l + rad, t + rad
-    a = math.radians(35)
-    ex, ey = cx + rad * math.cos(a), cy + rad * math.sin(a)
-    two = (f'<path d="M{l:.2f} {cy:.2f}A{rad:.2f} {rad:.2f} 0 1 1 {ex:.2f} {ey:.2f}L{l:.2f} {b:.2f}H566" '
-           f'style="fill:none;stroke:red;stroke-width:{sw};stroke-linecap:butt;stroke-linejoin:round"/>')
-    body = body.replace('width="560"', 'width="620"', 1)
-    write('switch2', body + two + f'<g transform="translate(60 0)">{tm}</g></svg>\n')
-
-
-def ps5() -> None:
-    """Carbon's PS4 logos with the 4 (and its counter) replaced by a 5: the PS letters' height
-    (y 24.06..88.51) and stroke (6.57), sharp left corners and round right ones like the S."""
-    for src, dst in (('ps4', 'ps5'), ('ps4-w', 'ps5-w')):
-        s = (LOGOS / f'{src}.svg').read_text(encoding='utf-8')
-        four = [p for p in re.findall(r'<path\b[^>]*/>', s) if re.search(r' d="M(382\.08|393\.714) ', p)]
-        assert len(four) == 2, f'{src}: the 4 not found'
-        color = '#fff' if 'fill="#fff"' in four[0] + four[1] else '#000'
-        for p in four:
-            s = s.replace(p, '')
-        sw = 6.57
-        h = sw / 2
-        top, bot = 24.06 + h, 88.51 - h
-        mid = 52.5
-        left, right = 392 + h, 467 - h
-        rad = (bot - mid) / 2
-        five = (f'<path d="M467 {top:.2f}H{left:.2f}V{mid:.2f}H{right - rad:.2f}'
-                f'A{rad:.2f} {rad:.2f} 0 0 1 {right:.2f} {mid + rad:.2f}'
-                f'A{rad:.2f} {rad:.2f} 0 0 1 {right - rad:.2f} {bot:.2f}H392" '
-                f'style="fill:none;stroke:{color};stroke-width:{sw};stroke-linecap:butt;stroke-linejoin:miter"/>')
-        write(dst, s.replace('</svg>', five + '</svg>'))
-
-
 OUT.mkdir(parents=True, exist_ok=True)
-switch2()
-ps5()
 
 # Only systems with no official logo in Pixel Nostalgia's Carbon-PixN (the others are its
 # logos, see README.md)

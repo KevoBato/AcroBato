@@ -61,8 +61,7 @@ source repository.
 | bluemsx (RetroArch core) | e3086eb5d3 | BSD-style / GPL (per file) | libretro core source (bluemsx), see Batocera recipe | cores-bluemsx/license.txt |
 | puae (RetroArch core) | 6536174a80 | GPL-2.0 | libretro core source (puae), see Batocera recipe | cores-puae/COPYING |
 | libretro core info files | eac3a2784d | MIT | https://github.com/libretro/libretro-core-info | libretro-core-info/COPYING |
-| Carbon theme for EmulationStation |  | no license stated (by Rookervik, based on "simple" by Nils Bonenberger; maintained by fabricecaruso); credits in its readme.txt | https://github.com/fabricecaruso/es-theme-carbon | theme-carbon/readme.txt |
-| Carbon-PixN arcade system logos (Pixel Nostalgia) |  | GPL-3.0 | https://github.com/PixelNostalgia/Carbon-PixN | theme-carbon-pixn/LICENSE-Carbon-PixN, theme-carbon-pixn/README.md |
+| Carbon-PixN theme for EmulationStation (Pixel Nostalgia; Carbon by Rookervik, based on "simple" by Nils Bonenberger) |  | GPL-3.0 | https://github.com/PixelNostalgia/Carbon-PixN | theme-carbon-pixn/LICENSE, theme-carbon-pixn/README.md |
 | RetroArch assets (menu icons, sounds) |  | CC-BY-4.0 | https://github.com/libretro/retroarch-assets | - |
 | RetroArch shaders (slang/glsl presets used by Batocera) |  | various, per shader (see each file header) | https://github.com/libretro/slang-shaders | - |
 | Dolphin "Sys" data / PPSSPP assets |  | GPL-2.0-or-later (part of Dolphin / PPSSPP) | https://github.com/dolphin-emu/dolphin, https://github.com/hrydgard/ppsspp | - |
