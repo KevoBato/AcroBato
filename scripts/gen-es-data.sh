@@ -11,7 +11,7 @@ trap 'rm -rf "$OUT"' EXIT
 
 # Emulators offered: RetroArch (bundled) + the standalone ones in the downloader.
 STANDALONE="pcsx2 dolphin-emu duckstation-common rpcs3 ppsspp cemu-common xemu azahar flycast melonds shadps4 vita3k
-  supermodel hypseus-singe sm2-emu odin xemu-chihiro pcsx2x6 linuxloader"
+  supermodel hypseus-singe sm2-emu odin xemu-chihiro pcsx2x6 linuxloader devilutionx ruffle openbor"
 # RetroArch cores bundled in the AppImage (build-cores.sh, last column of its table)
 CORES="${CORES:-fceumm nestopia snes9x genesisplusgx picodrive gambatte mgba pcsx_rearmed stella2014 handy mednafen_ngp mednafen_wswan pce_fast prosystem vecx
   melonds desmume dolphin mupen64plus-next parallel_n64 ppsspp flycast swanstation fbneo beetle-saturn dosbox_pure opera neocd bluemsx puae

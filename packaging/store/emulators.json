@@ -110,6 +110,25 @@
       "install": "/usr/bin/windows-arcade-loader", "systems": ["typex"]
     },
     {
+      "id": "devilutionx", "name": "DevilutionX", "group": "EMULATORS",
+      "description": "Diablo and Hellfire (needs your own game data, DIABDAT.MPQ)",
+      "source": {"type": "github", "repo": "diasurgical/devilutionX", "release": "latest", "asset": "^devilutionx-linux-x86_64\\.appimage$"},
+      "install": "/usr/bin/devilutionx"
+    },
+    {
+      "id": "ruffle", "name": "Ruffle", "group": "EMULATORS",
+      "description": "Flash games (nightly builds; the project publishes no stable ones)",
+      "source": {"type": "github", "repo": "ruffle-rs/ruffle", "release": "recent", "asset": "-linux-x86_64\\.tar\\.gz$", "archive": "tar.gz", "exe": "ruffle"},
+      "install": "/usr/bin/ruffle"
+    },
+    {
+      "id": "openbor", "name": "OpenBOR", "group": "EMULATORS",
+      "description": "OpenBOR beat-em-up games (one current engine for all games; Batocera has four engine versions)",
+      "source": {"type": "github", "repo": "DCurrent/openbor", "release": "latest", "asset": "^OpenBOR-Linux-x64-.*\\.AppImage$"},
+      "install": "/usr/bin/OpenBOR7530",
+      "aliases": ["/usr/bin/OpenBOR6412", "/usr/bin/OpenBOR7142", "/usr/bin/OpenBOR4432"]
+    },
+    {
       "id": "linuxloader", "name": "Linux Loader (Lindbergh)", "group": "EMULATORS",
       "description": "Sega Lindbergh arcade games (needs the 32-bit system libraries Steam installs)",
       "_note": "official AppImage, used unpacked at Batocera's /usr/bin/linuxloader layout: the program behind a wrapper that sets the AppImage's 32-bit library path",
@@ -217,6 +236,42 @@
       "description": "Arcade: early 1970s discrete-logic arcade games (Pong, Breakout...)",
       "source": {"type": "libretro", "core": "dice"},
       "install": "/usr/lib/libretro/dice_libretro.so"
+    },
+    {
+      "id": "lr-scummvm", "name": "ScummVM (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Point-and-click adventure games (LucasArts, Sierra...) (55 MB download)",
+      "source": {"type": "libretro", "core": "scummvm"},
+      "install": "/usr/lib/libretro/scummvm_libretro.so"
+    },
+    {
+      "id": "lr-easyrpg", "name": "EasyRPG (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "RPG Maker 2000/2003 games",
+      "source": {"type": "libretro", "core": "easyrpg"},
+      "install": "/usr/lib/libretro/easyrpg_libretro.so"
+    },
+    {
+      "id": "lr-same_cdi", "name": "SAME CD-i (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Philips CD-i",
+      "source": {"type": "libretro", "core": "same_cdi"},
+      "install": "/usr/lib/libretro/same_cdi_libretro.so"
+    },
+    {
+      "id": "lr-vitaquake2", "name": "vitaQuake II (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Quake II",
+      "source": {"type": "libretro", "core": "vitaquake2"},
+      "install": "/usr/lib/libretro/vitaquake2_libretro.so"
+    },
+    {
+      "id": "lr-boom3", "name": "Boom3 (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Doom 3",
+      "source": {"type": "libretro", "core": "boom3"},
+      "install": "/usr/lib/libretro/boom3_libretro.so"
+    },
+    {
+      "id": "lr-bsnes", "name": "bsnes (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Super Game Boy with MSU-1 audio",
+      "source": {"type": "libretro", "core": "bsnes"},
+      "install": "/usr/lib/libretro/bsnes_libretro.so"
     },
     {
       "id": "ge-proton", "name": "GE-Proton", "group": "EMULATORS",

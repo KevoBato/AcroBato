@@ -326,6 +326,12 @@ def install_files(e: dict) -> None:
     empty folders it expects ("mkdir": ["/usr/share/..."])."""
     for d in e.get('mkdir', []):
         usr_path(d).mkdir(parents=True, exist_ok=True)
+    # other names Batocera's launcher runs the same program by ("aliases": ["/usr/bin/..."])
+    for a in e.get('aliases', []):
+        link = usr_path(a)
+        link.parent.mkdir(parents=True, exist_ok=True)
+        link.unlink(missing_ok=True)
+        link.symlink_to(os.path.relpath(target(e), link.parent))
     for f in e.get('files', []):
         src = APPS / e['id'] / f['from']
         if not src.exists():
@@ -379,7 +385,8 @@ def install_extras(e: dict) -> None:
 
 def installed_paths(e: dict) -> list[Path]:
     """Everything the install put outside the emulator's own folder (removed with it)."""
-    paths = [usr_path(f['install']) for f in e.get('files', [])] + [usr_path(d) for d in e.get('mkdir', [])]
+    paths = ([usr_path(f['install']) for f in e.get('files', [])] + [usr_path(d) for d in e.get('mkdir', [])]
+             + [usr_path(a) for a in e.get('aliases', [])])
     for x in e.get('extras', []):
         if 'extract' not in x:
             paths.append(usr_path(x['install']))
