@@ -62,11 +62,12 @@ source repository.
 | puae (RetroArch core) | 6536174a80 | GPL-2.0 | libretro core source (puae), see Batocera recipe | cores-puae/COPYING |
 | libretro core info files | eac3a2784d | MIT | https://github.com/libretro/libretro-core-info | libretro-core-info/COPYING |
 | Carbon theme for EmulationStation |  | no license stated (by Rookervik, based on "simple" by Nils Bonenberger; maintained by fabricecaruso); credits in its readme.txt | https://github.com/fabricecaruso/es-theme-carbon | theme-carbon/readme.txt |
+| Carbon-PixN arcade system logos (Pixel Nostalgia) |  | GPL-3.0 | https://github.com/PixelNostalgia/Carbon-PixN | theme-carbon-pixn/LICENSE-Carbon-PixN, theme-carbon-pixn/README.md |
 | RetroArch assets (menu icons, sounds) |  | CC-BY-4.0 | https://github.com/libretro/retroarch-assets | - |
 | RetroArch shaders (slang/glsl presets used by Batocera) |  | various, per shader (see each file header) | https://github.com/libretro/slang-shaders | - |
 | Dolphin "Sys" data / PPSSPP assets |  | GPL-2.0-or-later (part of Dolphin / PPSSPP) | https://github.com/dolphin-emu/dolphin, https://github.com/hrydgard/ppsspp | - |
-| Homebrew games for the first start (2048 by tsone, Old Towers by RetroSouls, Space Twins by 9wires, Reflectron and Santatlantean by Aetherbyte) |  | freeware, distributed by Batocera; permission for AcroBato not yet confirmed with the authors | Batocera datainit | - |
 | Python 3.14 (python-build-standalone) |  | PSF-2.0 (bundled libraries: see its LICENSE.txt) | https://github.com/astral-sh/python-build-standalone | python/LICENSE.txt |
+| acrobato-emulators (Python package, part of AcroBato) | 1.0 | GPL-3.0-or-later | AcroBato source repository | acrobato/LICENSE |
 | aiodns (Python package) | 4.0.4 | MIT | https://pypi.org/project/aiodns | python-aiodns/LICENSE |
 | aiohappyeyeballs (Python package) | 2.7.1 | PSF-2.0 | https://pypi.org/project/aiohappyeyeballs | python-aiohappyeyeballs/LICENSE |
 | aiohttp (Python package) | 3.14.5 | Apache-2.0 AND MIT | https://pypi.org/project/aiohttp | python-aiohttp/LICENSE.txt, python-aiohttp/LICENSE |
@@ -112,6 +113,7 @@ source repository.
 | libbluetooth3 (libbluetooth.so.3) | 5.64-0ubuntu1.6 | see Debian copyright file | Ubuntu 22.04 package libbluetooth3 | ubuntu-libbluetooth3/copyright |
 | libbrotli1 (libbrotlicommon.so.1, libbrotlidec.so.1) | 1.0.9-2ubuntu0.1 | see Debian copyright file | Ubuntu 22.04 package libbrotli1 | ubuntu-libbrotli1/copyright |
 | libbsd0 (libbsd.so.0) | 0.11.5-1 | see Debian copyright file | Ubuntu 22.04 package libbsd0 | ubuntu-libbsd0/copyright |
+| libbz2-1.0 (libbz2.so.1.0) | 1.0.8-5ubuntu0.1 | see Debian copyright file | Ubuntu 22.04 package libbz2-1.0 | ubuntu-libbz2-1.0/copyright |
 | libcairo2 (libcairo.so.2) | 1.16.0-5ubuntu2.1 | see Debian copyright file | Ubuntu 22.04 package libcairo2 | ubuntu-libcairo2/copyright |
 | libcap2 (libcap.so.2) | 1:2.44-1ubuntu0.22.04.3 | see Debian copyright file | Ubuntu 22.04 package libcap2 | ubuntu-libcap2/copyright |
 | libcom-err2 (libcom_err.so.2) | 1.46.5-2ubuntu1.2 | see Debian copyright file | Ubuntu 22.04 package libcom-err2 | ubuntu-libcom-err2/copyright |
@@ -125,6 +127,8 @@ source repository.
 | libfreeimage3 (libfreeimage.so.3) | 3.18.0+ds2-6ubuntu5.1 | see Debian copyright file | Ubuntu 22.04 package libfreeimage3 | ubuntu-libfreeimage3/copyright |
 | libfreetype6 (libfreetype.so.6) | 2.11.1+dfsg-1ubuntu0.4 | see Debian copyright file | Ubuntu 22.04 package libfreetype6 | ubuntu-libfreetype6/copyright |
 | libfribidi0 (libfribidi.so.0) | 1.0.8-2ubuntu3.1 | see Debian copyright file | Ubuntu 22.04 package libfribidi0 | ubuntu-libfribidi0/copyright |
+| libfuse2 (libfuse.so.2) | 2.9.9-5ubuntu3 | see Debian copyright file | Ubuntu 22.04 package libfuse2 | ubuntu-libfuse2/copyright |
+| libfuse3-3 (libfuse3.so.3) | 3.10.5-1build1 | see Debian copyright file | Ubuntu 22.04 package libfuse3-3 | ubuntu-libfuse3-3/copyright |
 | libgcrypt20 (libgcrypt.so.20) | 1.9.4-3ubuntu3.3 | see Debian copyright file | Ubuntu 22.04 package libgcrypt20 | ubuntu-libgcrypt20/copyright |
 | libglew2.2 (libGLEW.so.2.2) | 2.2.0-4 | see Debian copyright file | Ubuntu 22.04 package libglew2.2 | ubuntu-libglew2.2/copyright |
 | libgmp10 (libgmp.so.10) | 2:6.2.1+dfsg-3ubuntu1 | see Debian copyright file | Ubuntu 22.04 package libgmp10 | ubuntu-libgmp10/copyright |
@@ -148,11 +152,13 @@ source repository.
 | libldap-2.5-0 (liblber-2.5.so.0, libldap-2.5.so.0) | 2.5.20+dfsg-0ubuntu0.22.04.1 | see Debian copyright file | Ubuntu 22.04 package libldap-2.5-0 | ubuntu-libldap-2.5-0/copyright |
 | liblz4-1 (liblz4.so.1) | 1.9.3-2build2 | see Debian copyright file | Ubuntu 22.04 package liblz4-1 | ubuntu-liblz4-1/copyright |
 | liblzma5 (liblzma.so.5) | 5.2.5-2ubuntu1.2 | see Debian copyright file | Ubuntu 22.04 package liblzma5 | ubuntu-liblzma5/copyright |
+| liblzo2-2 (liblzo2.so.2) | 2.10-2build3 | see Debian copyright file | Ubuntu 22.04 package liblzo2-2 | ubuntu-liblzo2-2/copyright |
 | libmad0 (libmad.so.0) | 0.15.1b-10ubuntu1 | see Debian copyright file | Ubuntu 22.04 package libmad0 | ubuntu-libmad0/copyright |
 | libmatroska7 (libmatroska.so.7) | 1.6.3-2 | see Debian copyright file | Ubuntu 22.04 package libmatroska7 | ubuntu-libmatroska7/copyright |
 | libmd0 (libmd.so.0) | 1.0.4-1build1 | see Debian copyright file | Ubuntu 22.04 package libmd0 | ubuntu-libmd0/copyright |
 | libmpcdec6 (libmpcdec.so.6) | 2:0.1~r495-2 | see Debian copyright file | Ubuntu 22.04 package libmpcdec6 | ubuntu-libmpcdec6/copyright |
 | libmpg123-0 (libmpg123.so.0) | 1.29.3-1ubuntu0.1 | see Debian copyright file | Ubuntu 22.04 package libmpg123-0 | ubuntu-libmpg123-0/copyright |
+| libmspack0 (libmspack.so.0) | 0.10.1-2ubuntu0.1 | see Debian copyright file | Ubuntu 22.04 package libmspack0 | ubuntu-libmspack0/copyright |
 | libmysofa1 (libmysofa.so.1) | 1.2.1~dfsg0-1 | see Debian copyright file | Ubuntu 22.04 package libmysofa1 | ubuntu-libmysofa1/copyright |
 | libnettle8 (libnettle.so.8) | 3.7.3-1build2 | see Debian copyright file | Ubuntu 22.04 package libnettle8 | ubuntu-libnettle8/copyright |
 | libnghttp2-14 (libnghttp2.so.14) | 1.43.0-1ubuntu0.4 | see Debian copyright file | Ubuntu 22.04 package libnghttp2-14 | ubuntu-libnghttp2-14/copyright |
@@ -173,6 +179,7 @@ source repository.
 | libsoxr0 (libsoxr.so.0) | 0.1.3-4build2 | see Debian copyright file | Ubuntu 22.04 package libsoxr0 | ubuntu-libsoxr0/copyright |
 | libspatialaudio0 (libspatialaudio.so.0) | 0.3.0+git20180730+dfsg1-2build1 | see Debian copyright file | Ubuntu 22.04 package libspatialaudio0 | ubuntu-libspatialaudio0/copyright |
 | libspeexdsp1 (libspeexdsp.so.1) | 1.2~rc1.2-1.1ubuntu3 | see Debian copyright file | Ubuntu 22.04 package libspeexdsp1 | ubuntu-libspeexdsp1/copyright |
+| libsquashfuse0 (libfuseprivate.so.0, libsquashfuse.so.0) | 0.1.103-3 | see Debian copyright file | Ubuntu 22.04 package libsquashfuse0 | ubuntu-libsquashfuse0/copyright |
 | libssh-4 (libssh.so.4) | 0.9.6-2ubuntu0.22.04.8 | see Debian copyright file | Ubuntu 22.04 package libssh-4 | ubuntu-libssh-4/copyright |
 | libssl3 (libcrypto.so.3, libssl.so.3) | 3.0.2-0ubuntu1.30 | see Debian copyright file | Ubuntu 22.04 package libssl3 | ubuntu-libssl3/copyright |
 | libtasn1-6 (libtasn1.so.6) | 4.18.0-4ubuntu0.2 | see Debian copyright file | Ubuntu 22.04 package libtasn1-6 | ubuntu-libtasn1-6/copyright |

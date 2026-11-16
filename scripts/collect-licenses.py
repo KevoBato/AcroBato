@@ -120,6 +120,10 @@ rows.append(('Carbon theme for EmulationStation', '', 'no license stated (by Roo
              'Bonenberger; maintained by fabricecaruso); credits in its readme.txt',
              'https://github.com/fabricecaruso/es-theme-carbon',
              copy('theme-carbon', A / 'usr/share/emulationstation/themes/es-theme-carbon/readme.txt')))
+rows.append(('Carbon-PixN arcade system logos (Pixel Nostalgia)', '', 'GPL-3.0',
+             'https://github.com/PixelNostalgia/Carbon-PixN',
+             copy('theme-carbon-pixn', HERE / 'packaging/theme/LICENSE-Carbon-PixN',
+                  HERE / 'packaging/theme/README.md')))
 rows.append(('RetroArch assets (menu icons, sounds)', '', 'CC-BY-4.0', 'https://github.com/libretro/retroarch-assets', []))
 rows.append(('RetroArch shaders (slang/glsl presets used by Batocera)', '', 'various, per shader (see each file header)',
              'https://github.com/libretro/slang-shaders', []))

@@ -8,8 +8,8 @@ committed (packaging/theme/es-theme-carbon/art/logos/), so the build doesn't nee
 The logos are built from Carbon's own art, in its style:
 - switch2: Carbon's Switch logo with a "2" in the same red, height and stroke weight
 - ps5 / ps5-w: Carbon's PS4 logos with the "4" replaced by a "5" in the same thin style
-- arcade systems: the maker's Carbon logo (SEGA, namco, TAITO, KONAMI, ARCADE) with the system
-  name, or a wordmark for makers Carbon has no logo for
+- arcade systems Pixel Nostalgia's Carbon-PixN has no logo for: the maker's Carbon logo (SEGA,
+  ARCADE) with the system name, or a wordmark (Tsunami)
 Text is turned into paths (ES's SVG renderer, nanosvg, draws no <text>), in Cabin Bold: the
 theme's own font (SIL Open Font License).
 
@@ -176,18 +176,10 @@ OUT.mkdir(parents=True, exist_ok=True)
 switch2()
 ps5()
 
-SEGA, NAMCO, TAITO = '#0060a8', '#a51e23', '#127bca'
-for name, label in (('segare', 'RingEdge'), ('segaer', 'Europa-R'), ('segaalls', 'ALLS'),
-                    ('seganu', 'Nu'), ('segashell', 'Shell'), ('apm3', 'APM3')):
-    stacked(name, 'sega', label, SEGA)
-stacked('namcoes3', 'namco', 'System ES3', NAMCO, maker_h=40)
-stacked('nesicax', 'taito', 'NESiCAxLive', TAITO)
-stacked('nesicax2', 'taito', 'NESiCAxLive 2', TAITO)
-beside('konamipc', 'konami', 'PC BASED', '#ff0018')
+# Only systems with no official logo in Pixel Nostalgia's Carbon-PixN (the others are its
+# logos, see README.md)
+SEGA = '#0060a8'
+stacked('segashell', 'sega', 'Shell', SEGA)
+stacked('apm3', 'sega', 'APM3', SEGA)
 beside('arcadepc', 'arcade', 'PC', '#F4B20C', maker_h=60, cap=48)
-wordmark('rawthrills', 'RAW THRILLS', '', '#d71920', '')
-wordmark('globalvr', 'GLOBAL VR', '', '#1b75bc', '')
-wordmark('adrenaline', 'ADRENALINE', 'AMUSEMENTS', '#f15a22', '#9a9a9a')
-wordmark('unis', 'UNIS', 'UNIVERSAL SPACE', '#0a4ea2', '#e31e24')
-wordmark('wahlap', 'WAHLAP', 'TECHNOLOGY', '#e60012', '#9a9a9a')
 wordmark('tsunami', 'TSUNAMI', 'VISUAL TECHNOLOGIES', '#0093c9', '#9a9a9a')
