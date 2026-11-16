@@ -7,7 +7,8 @@ The theme looks art up by system name (${system.theme}) in art/logos, art/backgr
 art/consoles, art/controllers and their region folders (us/, jp/, br/), with -w (white) and
 -<lang> variants. Carbon-PixN has art for hundreds of systems; AcroBato has about 90.
 Kept: the systems' and their groups' names (es_systems.cfg <theme>, <group>), "default", any
-name the theme's XML spells out, and collections/ (ES collections use those).
+name the theme's XML spells out, ES's collections (auto-*, custom-collections*), and the
+collections/ folders.
 """
 import re
 import sys
@@ -34,6 +35,10 @@ SUFFIX = re.compile(r'(?:-w)?(?:-[a-z]{2}(?:_[A-Za-z]{2})?)?$')
 
 
 def wanted(stem: str) -> bool:
+    # ES's collections have the theme names auto-<name> (Favorites, Last played, All games, the
+    # genre ones...) and custom-collections; their art sits next to the systems'
+    if stem.startswith(('auto-', 'custom-collections')):
+        return True
     return stem in keep or SUFFIX.sub('', stem) in keep
 
 
