@@ -15,6 +15,11 @@ install -D -m 0644 -t "$L/data/special" "$SRC"/batocera-launch/resources/data/sp
 # MAME (libretro and standalone): ROM and control data (batocera-launch-mame-common.mk)
 install -D -m 0644 -t "$L/data/mame" "$SRC"/batocera-launch-mame-common/resources/*.toml
 install -D -m 0644 -t "$SHARE/evmapy" "$SRC/batocera-launch/resources/hotkeys.keys"
+# controller-to-keyboard maps of the systems/emulators that read the keyboard (evmapy turns the pad
+# into those keys, e.g. RPCS3's Namco arcade games): each Batocera package installs its own
+# (cp, not install: two ports both ship a quake3.keys, and install refuses to overwrite a file it
+# just created)
+find "$1/package/batocera" -name '*.keys' -exec cp -f {} "$SHARE/evmapy/" \;
 install -D -m 0755 -t "$L" "$SRC/batocera-launch-libretro/resources/scripts/call_achievements_hooks.sh"
 echo x86_64 > "$SHARE/batocera/batocera.arch"
 # shader set definitions (batocera-shaders.mk, BATOCERA_GPU=x86). The actual
