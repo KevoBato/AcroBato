@@ -204,11 +204,18 @@ def install_github(e: dict) -> str:
     with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
         dl = Path(tmp) / info['asset']
         download(info['url'], dl, e['name'], info['size'], info['digest'])
-        if e['source'].get('archive') == 'tar.gz':  # a whole program folder (e.g. KytyPS5)
+        if e['source'].get('archive') in ('tar.gz', 'zip'):  # a whole program folder (e.g. KytyPS5)
             import tarfile
             say('Extracting')
-            with tarfile.open(dl) as t:
-                t.extractall(Path(tmp) / 'x', filter='data')
+            if e['source']['archive'] == 'zip':
+                with zipfile.ZipFile(dl) as z:
+                    for m in z.infolist():  # (zip has no tarfile-style 'data' filter: same checks)
+                        if m.filename.startswith('/') or '..' in Path(m.filename).parts:
+                            raise RuntimeError(f'unsafe path in the archive: {m.filename}')
+                    z.extractall(Path(tmp) / 'x')
+            else:
+                with tarfile.open(dl) as t:
+                    t.extractall(Path(tmp) / 'x', filter='data')
             exes = [p for p in (Path(tmp) / 'x').rglob(e['source']['exe']) if p.is_file()]
             if not exes:
                 raise RuntimeError(f"archive does not contain {e['source']['exe']}")
@@ -304,6 +311,10 @@ def install_libretro(e: dict) -> str:
 
 
 def usr_path(p: str) -> Path:
+    """A catalog install path: /usr/... in the downloaded emulators' tree, /userdata/... in the
+    user's data folder (e.g. a BIOS file Batocera ships as a default: /userdata/bios/...)."""
+    if p.startswith('/userdata/'):
+        return USERDATA / p.removeprefix('/userdata/')
     return USR / p.removeprefix('/usr/')
 
 
@@ -336,7 +347,10 @@ def install_files(e: dict) -> None:
         src = APPS / e['id'] / f['from']
         if not src.exists():
             raise RuntimeError(f"the download has no {f['from']}")
-        put(src, usr_path(f['install']))
+        dest = usr_path(f['install'])
+        if f['install'].startswith('/userdata/') and dest.exists():
+            continue  # the user's own file (a BIOS they put there) stays
+        put(src, dest)
 
 
 def install_extras(e: dict) -> None:
@@ -385,7 +399,9 @@ def install_extras(e: dict) -> None:
 
 def installed_paths(e: dict) -> list[Path]:
     """Everything the install put outside the emulator's own folder (removed with it)."""
-    paths = ([usr_path(f['install']) for f in e.get('files', [])] + [usr_path(d) for d in e.get('mkdir', [])]
+    # (files put in the user's data folder, e.g. BIOS files, are left there)
+    paths = ([usr_path(f['install']) for f in e.get('files', []) if not f['install'].startswith('/userdata/')]
+             + [usr_path(d) for d in e.get('mkdir', [])]
              + [usr_path(a) for a in e.get('aliases', [])])
     for x in e.get('extras', []):
         if 'extract' not in x:

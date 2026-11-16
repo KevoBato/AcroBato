@@ -129,6 +129,25 @@
       "aliases": ["/usr/bin/OpenBOR6412", "/usr/bin/OpenBOR7142", "/usr/bin/OpenBOR4432"]
     },
     {
+      "id": "x16emu", "name": "Commander X16 Emulator", "group": "EMULATORS",
+      "description": "Commander X16 (its system ROM comes with it, into bios/commanderx16)",
+      "source": {"type": "github", "repo": "X16Community/x16-emulator", "release": "latest", "asset": "^x16emu_linux-x86_64-.*\\.zip$", "archive": "zip", "exe": "x16emu"},
+      "install": "/usr/bin/x16emu",
+      "files": [{"from": "rom.bin", "install": "/userdata/bios/commanderx16/rom.bin"}]
+    },
+    {
+      "id": "ikemen", "name": "IKEMEN GO", "group": "EMULATORS",
+      "description": "IKEMEN GO fighting games (nightly build; each game is its own folder)",
+      "source": {"type": "github", "repo": "ikemen-engine/Ikemen-GO", "release": "tags/nightly", "asset": "^Ikemen_GO-dev-linux\\.zip$", "archive": "zip", "exe": "Ikemen_GO_Linux"},
+      "install": "/usr/bin/ikemen"
+    },
+    {
+      "id": "moonlight", "name": "Moonlight", "group": "EMULATORS",
+      "description": "Stream games from a PC running Sunshine or NVIDIA GameStream",
+      "source": {"type": "github", "repo": "moonlight-stream/moonlight-qt", "release": "latest", "asset": "^Moonlight-.*-x86_64\\.AppImage$"},
+      "install": "/usr/bin/moonlight-qt"
+    },
+    {
       "id": "linuxloader", "name": "Linux Loader (Lindbergh)", "group": "EMULATORS",
       "description": "Sega Lindbergh arcade games (needs the 32-bit system libraries Steam installs)",
       "_note": "official AppImage, used unpacked at Batocera's /usr/bin/linuxloader layout: the program behind a wrapper that sets the AppImage's 32-bit library path",
