@@ -12,6 +12,10 @@ the SHA-256 digest GitHub publishes, when there is one) or from Flathub. They
 are stored under <userdata>/emulators and exposed at the path Batocera's
 launcher expects, e.g. /usr/bin/duckstation-qt -> <userdata>/emulators/usr/bin/duckstation-qt
 (see relocate() / ES_USR / ES_BIN).
+
+RetroArch cores not bundled in the AppImage (source type "libretro") come from libretro's
+official build server (buildbot.libretro.com, Linux x86_64 nightly), checked against the CRC32
+its index publishes for each core, into <userdata>/emulators/usr/lib/libretro (ES_LIBRETRO_CORES).
 """
 from __future__ import annotations
 
@@ -90,14 +94,35 @@ def github_release(src: dict) -> dict:
     raise RuntimeError(f"no matching download in {src['repo']} ({release})")
 
 
+BUILDBOT = 'https://buildbot.libretro.com/nightly/linux/x86_64/latest'
+
+
+def buildbot_index() -> dict[str, dict]:
+    """libretro's build server index: '<date> <crc32> <core>_libretro.so.zip' per line (the CRC32
+    is the core's, inside the zip)."""
+    with urllib.request.urlopen(urllib.request.Request(f'{BUILDBOT}/.index-extended', headers=UA), timeout=30) as r:
+        lines = r.read().decode(errors='replace').splitlines()
+    out = {}
+    for line in lines:
+        parts = line.split()
+        if len(parts) == 3 and parts[2].endswith('_libretro.so.zip'):
+            out[parts[2].removesuffix('_libretro.so.zip')] = {'version': parts[0], 'crc32': parts[1].lower()}
+    return out
+
+
 def refresh() -> None:
     cache = {}
+    index = None
     for e in catalog():
-        if e['source']['type'] in ('github', 'gitea'):
-            try:
+        try:
+            if e['source']['type'] in ('github', 'gitea'):
                 cache[e['id']] = github_release(e['source'])
-            except Exception as ex:  # keep going; one project being down shouldn't hide the rest
-                print(f"{e['name']}: {ex}", file=sys.stderr)
+            elif e['source']['type'] == 'libretro':
+                index = index if index is not None else buildbot_index()
+                if e['source']['core'] in index:
+                    cache[e['id']] = index[e['source']['core']]
+        except Exception as ex:  # keep going; one project being down shouldn't hide the rest
+            print(f"{e['name']}: {ex}", file=sys.stderr)
     cache['_time'] = time.time()
     save(CACHE, cache)
 
@@ -130,7 +155,8 @@ def cmd_list() -> None:
                          ('available_version', info.get('version', '')),
                          ('download_size', str(info.get('size', 0) // 1024)),  # ES expects KB
                          ('url', f"{e['source'].get('server', 'https://github.com')}/{e['source']['repo']}"
-                          if 'repo' in e['source'] else ''),
+                          if 'repo' in e['source'] else
+                          'https://buildbot.libretro.com' if e['source']['type'] == 'libretro' else ''),
                          ('status', 'installed' if installed else '')):
             out.append(f'    <{tag}>{escape(str(val))}</{tag}>')
         out.append('  </package>')
@@ -161,7 +187,7 @@ def download(url: str, dest: Path, label: str, size: int, digest: str) -> None:
             dest.unlink(missing_ok=True)
             raise RuntimeError('checksum mismatch: download was corrupted or altered, nothing installed')
         say('Checksum verified')
-    else:
+    elif digest != 'checked-later':
         say('No checksum published upstream for this file (HTTPS download only)')
 
 
@@ -226,6 +252,44 @@ def install_github(e: dict) -> str:
     return info['version']
 
 
+def install_libretro(e: dict) -> str:
+    """A RetroArch core from libretro's build server, CRC32-checked, at its libretro path."""
+    import zlib
+    core = e['source']['core']
+    info = buildbot_index().get(core)
+    if not info:
+        raise RuntimeError(f'{core} is not on the libretro build server')
+    say(f"{e['name']} ({info['version']} build)")
+    with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+        dl = Path(tmp) / f'{core}_libretro.so.zip'
+        download(f'{BUILDBOT}/{core}_libretro.so.zip', dl, e['name'], 0, 'checked-later')  # CRC32 below
+        say('Extracting')
+        with zipfile.ZipFile(dl) as z:
+            z.extract(f'{core}_libretro.so', tmp)
+        so = Path(tmp) / f'{core}_libretro.so'
+        crc = 0
+        with open(so, 'rb') as f:
+            while chunk := f.read(1 << 20):
+                crc = zlib.crc32(chunk, crc)
+        if f'{crc:08x}' != info['crc32']:
+            raise RuntimeError('checksum mismatch: download was corrupted or altered, nothing installed')
+        say('Checksum verified')
+        target(e).parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(so, target(e))
+    return info['version']
+
+
+def install_extras(e: dict) -> None:
+    """Files an emulator needs besides its own download (e.g. MAME's plugins), pinned by
+    SHA-256 in the catalog."""
+    for x in e.get('extras', []):
+        dest = USR / x['install'].removeprefix('/usr/')
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_name(dest.name + '.part')
+        download(x['url'], tmp, dest.name, 0, f"sha256:{x['sha256']}")
+        tmp.replace(dest)
+
+
 def install_flatpak(e: dict) -> str:
     src = e['source']
     if not shutil.which('flatpak'):
@@ -264,7 +328,10 @@ def flatpak_launcher(ref: str) -> str:
 def cmd_install(name: str) -> None:
     e = find(name)
     ROOT.mkdir(parents=True, exist_ok=True)
-    version = install_flatpak(e) if e['source']['type'] == 'flatpak' else install_github(e)
+    kind = e['source']['type']
+    version = (install_flatpak(e) if kind == 'flatpak' else install_libretro(e) if kind == 'libretro'
+               else install_github(e))
+    install_extras(e)
     state = load(STATE, {})
     state[e['id']] = {'version': version, 'installed': time.strftime('%Y-%m-%d')}
     save(STATE, state)
@@ -285,6 +352,8 @@ def cmd_remove(name: str) -> None:
     for f in window_entries(e):
         f.unlink(missing_ok=True)
     target(e).unlink(missing_ok=True)
+    for x in e.get('extras', []):
+        (USR / x['install'].removeprefix('/usr/')).unlink(missing_ok=True)
     shutil.rmtree(APPS / e['id'], ignore_errors=True)
     if e['source']['type'] == 'flatpak' and shutil.which('flatpak'):
         say(f"Removing {e['name']} (Flatpak)")

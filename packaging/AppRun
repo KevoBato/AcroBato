@@ -85,9 +85,22 @@ link_data PPSSPP "$ES_SHARE/ppsspp/PPSSPP"
 # (No games are bundled. With an empty library ES shows all systems and a welcome message
 # saying where games go; see apply-es-fixes.py.)
 
-# Hotkey daemon (Hotkey+Start to quit a game, etc.). One per session.
+# Hotkey daemon (Hotkey+Start to quit a game, etc.). One per session bus: the launcher talks
+# to it over D-Bus (org.batocera.Hotkeygen). Asked on the bus, not by process name: a
+# hotkeygen in a container or another session shows in the process list but isn't on ours.
+hotkeygen_on_bus() {
+  if command -v gdbus >/dev/null 2>&1; then
+    gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
+      --method org.freedesktop.DBus.NameHasOwner org.batocera.Hotkeygen 2>/dev/null | grep -q true
+  elif command -v dbus-send >/dev/null 2>&1; then
+    dbus-send --session --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus \
+      org.freedesktop.DBus.NameHasOwner string:org.batocera.Hotkeygen 2>/dev/null | grep -q true
+  else
+    pgrep -u "$(id -u)" -f "argv\[0\] = \"hotkeygen\"" >/dev/null 2>&1
+  fi
+}
 HK_PID=""
-if ! pgrep -u "$(id -u)" -f "argv\[0\] = \"hotkeygen\"" >/dev/null 2>&1; then
+if ! hotkeygen_on_bus; then
   hotkeygen >"$U/system/logs/hotkeygen.log" 2>&1 &
   HK_PID=$!
 fi

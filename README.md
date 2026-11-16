@@ -16,7 +16,9 @@ Standalone emulators (PCSX2, Dolphin, RPCS3, shadPS4 and more) can be downloaded
   Mega Drive/Genesis, Master System, Game Gear, Saturn, Dreamcast, PC Engine, Neo Geo, arcade, DOS,
   Amiga, MSX, 3DO, Lynx, WonderSwan, Atari 2600/7800, Vectrex and more.
 - **Emulator downloads:** *Updates & Downloads > Content Downloader* installs standalone emulators
-  from their official releases (checksum-verified where the project publishes checksums) or Flathub.
+  from their official releases (checksum-verified where the project publishes checksums) or Flathub,
+  and more RetroArch cores from libretro's build server (CRC-checked), such as MAME for arcade
+  systems (MAME, Sega Model 1/2/3, Namco System 22, CAVE, Gaelco) and DICE.
 - **Nintendo Switch, Switch 2 and PlayStation 5** (systems Batocera doesn't have), with emulators
   from the Content Downloader:
   - Switch: Eden (default), Ryujinx (Flathub) and Lichii

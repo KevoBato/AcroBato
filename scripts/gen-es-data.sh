@@ -15,10 +15,17 @@ STANDALONE="pcsx2 dolphin-emu duckstation-common rpcs3 ppsspp cemu-common xemu a
 CORES="${CORES:-fceumm nestopia snes9x genesisplusgx picodrive gambatte mgba pcsx_rearmed stella2014 handy mednafen_ngp mednafen_wswan pce_fast prosystem vecx
   melonds desmume dolphin mupen64plus-next parallel_n64 ppsspp flycast swanstation fbneo beetle-saturn dosbox_pure opera neocd bluemsx puae}"
 
+# RetroArch cores offered in the Content Downloader (packaging/store/emulators.json, source type
+# "libretro"): their systems are listed too. Also their variants (sega-arcade.mame for mame).
+DOWNLOAD_CORES="$(python3 -c 'import json,sys; print(" ".join(e["source"]["core"] for e in json.load(open(sys.argv[1]))["emulators"] if e["source"]["type"] == "libretro"))' \
+  "$(dirname "$0")/../packaging/store/emulators.json")"
+echo "downloadable cores: $DOWNLOAD_CORES"
+
 {
   for f in _shared _global sh tdp._shared hud._shared; do echo "$ESS/$f.emulator.yml"; done
   find "$BL/package/batocera/emulators/retroarch/retroarch" -name '*.emulator.yml'
   for c in $CORES; do find "$BL/package/batocera" -name "$c.libretro.core.yml"; done
+  for c in $DOWNLOAD_CORES; do find "$BL/package/batocera" \( -name "$c.libretro.core.yml" -o -name "*.$c.libretro.core.yml" \); done
   for e in $STANDALONE; do find "$BL/package/batocera" -path "*/$e/*" -name '*.emulator.yml'; done
 } | sort -u | tr '\n' ' ' > "$OUT/info_files.txt"
 echo "using $(wc -w < "$OUT/info_files.txt") emulator definition files"

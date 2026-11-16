@@ -110,6 +110,29 @@
       "install": "/usr/bin/windows-arcade-loader", "systems": ["typex"]
     },
     {
+      "id": "lr-mame", "name": "MAME (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Arcade: MAME, Namco System 22, CAVE CV1000, Gaelco, Sega Model 1/2/3 (large: 111 MB download, 400 MB installed)",
+      "source": {"type": "libretro", "core": "mame"},
+      "install": "/usr/lib/libretro/mame_libretro.so",
+      "_extras": "MAME's hiscore plugin (Batocera's MAME setup loads it), from libretro/mame at a pinned commit",
+      "extras": [
+        {"url": "https://raw.githubusercontent.com/libretro/mame/283641602df2e427df61583083b317f96ba79a5b/plugins/hiscore/hiscore.dat",
+         "install": "/usr/bin/mame/plugins/hiscore/hiscore.dat", "sha256": "0b7e8e53ee9366f10c75df7b8b7c57de1ba573a1089cafd0937423843f4a2fc9"},
+        {"url": "https://raw.githubusercontent.com/libretro/mame/283641602df2e427df61583083b317f96ba79a5b/plugins/hiscore/init.lua",
+         "install": "/usr/bin/mame/plugins/hiscore/init.lua", "sha256": "7893a2222624bb84d6b29bd939bc4b82ba0e8bf7cee752f68faf95b9f9f79706"},
+        {"url": "https://raw.githubusercontent.com/libretro/mame/283641602df2e427df61583083b317f96ba79a5b/plugins/hiscore/plugin.json",
+         "install": "/usr/bin/mame/plugins/hiscore/plugin.json", "sha256": "a8bff3d9247bb90d83c7d52e1bb9290eec721ff1190a5cac9c94e2c29a7dd412"},
+        {"url": "https://raw.githubusercontent.com/libretro/mame/283641602df2e427df61583083b317f96ba79a5b/plugins/hiscore/sort_hiscore.lua",
+         "install": "/usr/bin/mame/plugins/hiscore/sort_hiscore.lua", "sha256": "c9abd00f2033e37770d51dc8da1bbadddc33fd79b18e97c64d98dc17ff046493"}
+      ]
+    },
+    {
+      "id": "lr-dice", "name": "DICE (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Arcade: early 1970s discrete-logic arcade games (Pong, Breakout...)",
+      "source": {"type": "libretro", "core": "dice"},
+      "install": "/usr/lib/libretro/dice_libretro.so"
+    },
+    {
       "id": "ge-proton", "name": "GE-Proton", "group": "EMULATORS",
       "description": "Wine runner used by the Windows Arcade Loader (large download)",
       "source": {"type": "github", "repo": "GloriousEggroll/proton-ge-custom", "release": "latest", "asset": "^GE-Proton[0-9-]+-x86_64\\.tar\\.gz$", "archive": "tar.gz", "exe": "proton"},

@@ -346,6 +346,16 @@ def main() -> int:
         "        if source.suffix == '.squashfs' and not getattr(getattr(needs_overlayfs, '__self__', None), 'mounts_own_squashfs', False):\n",
     )
 
+    # RetroArch cores are in the AppImage and in the Content Downloader's folder
+    # (ES_LIBRETRO_CORES lists both): look each core up in all of them, not only the first
+    # folder that exists.
+    tweak(
+        roots,
+        'batocera_launch_libretro/core.py',
+        "        return _RETROARCH_CORES_DIR / f'{self.library_prefix}_libretro.so'\n",
+        "        return relocate(f'/usr/lib/libretro/{self.library_prefix}_libretro.so')\n",
+    )
+
     # 4. report plain-string paths that still need a manual look
     leftovers = re.compile(r"""['"]/(?:userdata|usr/share)/""")
     for r, py in modules():

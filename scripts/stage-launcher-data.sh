@@ -12,6 +12,8 @@ install -D -m 0644 "$SRC/batocera-launch/resources/defaults/config.yml" "$L/defa
 install -D -m 0644 "$SRC/batocera-launch/resources/defaults/config-x86_64.yml" "$L/defaults/config-arch.yml"
 install -D -m 0644 -t "$L/data" "$SRC/batocera-launch/resources/data/gamesbuttonsdb.xml"
 install -D -m 0644 -t "$L/data/special" "$SRC"/batocera-launch/resources/data/special/*.toml
+# MAME (libretro and standalone): ROM and control data (batocera-launch-mame-common.mk)
+install -D -m 0644 -t "$L/data/mame" "$SRC"/batocera-launch-mame-common/resources/*.toml
 install -D -m 0644 -t "$SHARE/evmapy" "$SRC/batocera-launch/resources/hotkeys.keys"
 install -D -m 0755 -t "$L" "$SRC/batocera-launch-libretro/resources/scripts/call_achievements_hooks.sh"
 echo x86_64 > "$SHARE/batocera/batocera.arch"

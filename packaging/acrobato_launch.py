@@ -218,12 +218,61 @@ def _players(args: list[str]) -> list[str]:
     return new_args
 
 
+def _missing_core(args: list[str]) -> str | None:
+    """The Content Downloader name of the RetroArch core this game needs, when that core is a
+    download (not bundled) that isn't installed yet."""
+    if '-system' not in args:
+        return None
+    system = args[args.index('-system') + 1]
+    userdata = Path(os.environ.get('ES_USERDATA', Path.home() / '.local/share/acrobato'))
+    share = Path(os.environ.get('ES_SHARE', ''))
+    conf = _conf(userdata / 'system' / 'batocera.conf')
+    from batocera_launch.config.defaults import load_system_defaults
+    default = load_system_defaults(system)
+
+    def pick(key: str) -> str | None:
+        if f'-{key}' in args:
+            return args[args.index(f'-{key}') + 1]
+        return conf.get(f'{system}.{key}') or default.get(key)
+
+    if pick('emulator') != 'libretro':
+        return None
+    core = pick('core')
+    downloads = {e['source']['core']: e['name']
+                 for e in json.loads((share / 'acrobato' / 'emulators.json').read_text()).get('emulators', [])
+                 if e['source']['type'] == 'libretro'}
+    if core not in downloads:
+        return None
+    dirs = os.environ.get('ES_LIBRETRO_CORES', '').split(':')
+    if any((Path(d) / f'{core}_libretro.so').exists() for d in dirs if d):
+        return None
+    return downloads[core]
+
+
+def _notify(text: str) -> None:
+    """Pop-up in EmulationStation (its local web API)."""
+    import urllib.request
+    try:
+        urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:1234/notify', data=text.encode(),
+                                                      method='POST'), timeout=2).close()
+    except Exception:
+        pass
+
+
 def main() -> int:
     args = sys.argv[1:]
     try:
         args = _fallback(_emulator_window(args))
     except Exception as e:  # never block a launch because of this check
         print(f'acrobato: emulator check skipped: {e}', file=sys.stderr)
+    try:
+        if name := _missing_core(args):
+            msg = f'This game needs "{name}". Install it from Updates & Downloads > Content Downloader.'
+            print(f'acrobato: {msg}', file=sys.stderr)
+            _notify(msg)
+            return 1
+    except Exception as e:
+        print(f'acrobato: core check skipped: {e}', file=sys.stderr)
     try:
         args = _players(args)
     except Exception as e:

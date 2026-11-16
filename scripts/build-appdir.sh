@@ -97,8 +97,9 @@ for n in range(8):
 tree.write(path, encoding='unicode', xml_declaration=True)
 PY
 # Theme: Pixel Nostalgia's Carbon-PixN (GPL-3.0; Carbon with art for far more systems,
-# Batocera's arcade ones included), installed under Carbon's name. Trimmed to AcroBato's
-# systems further down (scripts/prune-theme.py), once es_systems.cfg is final.
+# Batocera's arcade ones included), installed under Carbon's name, whole: art for every system
+# AcroBato adds is already there. ACROBATO_TRIM_THEME=1 trims it to the listed systems instead
+# (scripts/prune-theme.py, further down once es_systems.cfg is final; about 250 MB less).
 CARBON_REPO=https://github.com/PixelNostalgia/Carbon-PixN.git
 CARBON_REV=a68c196c1cec3b47e6aee572a9d79f65889e4e5f
 THEME="$WORK/test/share/emulationstation/themes/es-theme-carbon-pixn"
@@ -169,8 +170,10 @@ export CORES
 bash "$HERE/scripts/gen-es-data.sh" "$BL" "$PY" "$A/usr/share"
 "$PY" "$HERE/scripts/fix-defaults.py" "$A/usr/share"   # defaults -> bundled cores / downloadable emulators
 "$PY" "$HERE/packaging/systems/add-systems.py" "$A/usr/share"   # Switch, Switch 2, PS5 (not in Batocera)
-"$PY" "$HERE/scripts/prune-theme.py" "$A/usr/share/emulationstation/themes/es-theme-carbon" \
-  "$A/usr/share/emulationstation/es_systems.cfg"
+if [ "${ACROBATO_TRIM_THEME:-0}" = 1 ]; then
+  "$PY" "$HERE/scripts/prune-theme.py" "$A/usr/share/emulationstation/themes/es-theme-carbon" \
+    "$A/usr/share/emulationstation/es_systems.cfg"
+fi
 "$PY" -m pip uninstall -q -y batocera-es-system   # build-time only
 "$PY" -m pip uninstall -q -y pip
 find "$A/usr/python" -name '__pycache__' -prune -exec rm -rf {} +
@@ -214,6 +217,11 @@ if [ -d "$DEPS/libretro/cores" ]; then
   cp "$DEPS"/libretro/info/*.info "$A/usr/share/libretro/info/" 2>/dev/null || true
   bundle_deps "$A"/usr/lib/libretro/*.so
 fi
+# .info files of the cores the Content Downloader offers (the launcher needs a core's .info)
+for c in $(python3 -c 'import json,sys; print(" ".join(e["source"]["core"] for e in json.load(open(sys.argv[1]))["emulators"] if e["source"]["type"] == "libretro"))' \
+           "$HERE/packaging/store/emulators.json"); do
+  cp "$DEPS/src/cores/libretro-core-info/${c}_libretro.info" "$A/usr/share/libretro/info/"
+done
 # core data files (Batocera OS ships these in its image; AppRun links them into bios/)
 CS="$DEPS/src/cores"
 [ -d "$CS/dolphin/Data/Sys" ] && { mkdir -p "$A/usr/share/dolphin-emu"; cp -r "$CS/dolphin/Data/Sys" "$A/usr/share/dolphin-emu/"; }
