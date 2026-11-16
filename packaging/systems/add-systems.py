@@ -27,6 +27,33 @@ SYSTEMS = [
 ]
 EDEN_FAMILY = ['eden', 'eglantine', 'lichii']
 
+# Windows-based arcade systems run by the Windows Arcade Loader. Folder names as in Pixel
+# Nostalgia's builds where they have one (typex, segare, nesicax...), so libraries move over.
+# (name, full name, maker, year, the loader's own system names in it)
+WAL = 'windows-arcade-loader'
+WAL_SYSTEMS = [
+    ('typex', 'Taito Type X', 'Taito', '2004', 'typex'),
+    ('typex2', 'Taito Type X2', 'Taito', '2006', 'typex'),
+    ('nesicax', 'NESiCAxLive', 'Taito', '2011', 'nesica'),
+    ('nesicax2', 'NESiCAxLive 2', 'Taito', '2016', 'nesica2'),
+    ('namcoes3', 'Namco System ES3', 'Namco', '2013', 'namcoes3'),
+    ('segare', 'Sega RingEdge', 'Sega', '2009', 'ringedge, ringedge2'),
+    ('segaer', 'Sega Europa-R', 'Sega', '2008', 'europar'),
+    ('segaalls', 'Sega ALLS', 'Sega', '2018', 'alls'),
+    ('seganu', 'Sega Nu', 'Sega', '2013', 'seganu'),
+    ('segashell', 'Sega Amusements Shell', 'Sega', '2016', 'segashell'),
+    ('apm3', 'Sega APM3', 'Sega', '2020', 'apm3'),
+    ('konamipc', 'Konami PC Based', 'Konami', '2008', 'konami'),
+    ('rawthrills', 'RAW Thrills', 'Raw Thrills', '2001', 'rawthrills'),
+    ('globalvr', 'Global VR', 'Global VR', '2001', 'globalvr'),
+    ('adrenaline', 'Adrenaline PC', 'Adrenaline Amusements', '2015', 'adrenaline'),
+    ('unis', 'UNIS Arcade Machines', 'UNIS', '2010', 'unis'),
+    ('wahlap', 'Wahlap Arcade Machines', 'Wahlap', '2010', 'wahlap'),
+    ('tsunami', 'Tsunami', 'Tsunami Visual Technologies', '2008', 'tsunami'),
+    ('arcadepc', 'Arcade PC', 'Various', '2000', 'arcadepc'),
+]
+SYSTEMS += [(name, full, maker, year, '.windowsloader .emuapp', [WAL]) for name, full, maker, year, _ in WAL_SYSTEMS]
+
 INFO = {
     'switch': """## Nintendo Switch
 
@@ -112,6 +139,16 @@ def add_features(path: Path) -> None:
             e = copy.deepcopy(src)
             e.set('name', emu)
             root.append(e)
+    # Windows Arcade Loader: its own Batocera options file (es_features_wal_upstream.cfg, from
+    # its repo), without the gamescope options (not ported to AcroBato)
+    if WAL not in existing:
+        e = ET.parse(HERE / 'es_features_wal_upstream.cfg').getroot().find('emulator')
+        e.set('name', WAL)
+        for parent in e.iter():
+            for child in list(parent):
+                if child.tag == 'sharedFeature' and child.get('value', '').startswith('gamescope'):
+                    parent.remove(child)
+        root.append(e)
     for emu in ('ryujinx', 'kyty'):
         if emu not in existing:
             e = ET.SubElement(root, 'emulator', name=emu, features='')
@@ -129,7 +166,29 @@ def add_defaults(path: Path) -> None:
     path.write_text(text)
 
 
+def wal_info(full: str, loader_systems: str) -> str:
+    return f"""## {full}
+
+Windows-based arcade games, run in Wine by the Windows Arcade Loader
+(https://github.com/aderumier/windowsarcadeloader; its "{loader_systems}" games).
+
+Install from Updates & Downloads > Content Downloader: "Windows Arcade Loader" and
+"GE-Proton" (the Wine it runs games with). The first game takes 10 minutes or more to start:
+the loader sets up Wine once (DirectX, Visual C++ runtimes...), for every game.
+
+Games: the game's dump folder, holding <gameid>.windowsloader (a small text file naming the
+game's executable; the game id picks the loader's settings for that game). The loader's README
+lists the supported games and their ids.
+
+"Open Windows Arcade Loader" (in the Taito Type X list) opens its window: controls per game
+and device, wheel calibration, player order, NESiCA and e-Amusement cards.
+Hotkey + Start quits a game; Hotkey + the coin button inserts a coin.
+"""
+
+
 def add_info() -> None:
+    for name, full, _maker, _year, loader_systems in WAL_SYSTEMS:
+        INFO.setdefault(name, wal_info(full, loader_systems))
     for name, text in INFO.items():
         d = SHARE / 'batocera/datainit/roms' / name
         d.mkdir(parents=True, exist_ok=True)

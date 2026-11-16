@@ -26,6 +26,10 @@ Standalone emulators (PCSX2, Dolphin, RPCS3, shadPS4 and more) can be downloaded
   Pick the emulator per game in *Advanced game options*. Eden, Eglantine and Lichii also have graphics,
   memory and system settings there. Switch keys and firmware go in `bios/switch/` (Switch 2 needs none), and
   "Open <emulator>" entries in each system's list open the emulator's own window.
+- **Windows-based arcade games** (Taito Type X, NESiCAxLive, Sega RingEdge, Namco ES3, Konami PC
+  and more, in Pixel Nostalgia's folder names: `typex`, `nesicax`, `segare`...) with the
+  [Windows Arcade Loader](https://github.com/aderumier/windowsarcadeloader). Install it and GE-Proton
+  from the Content Downloader. The first game takes 10 minutes or more to start while Wine is set up once.
 - **Controllers:** Batocera's controller database (about 340 pads). Steam's virtual controllers
   are supported in Game Mode and when launched from Steam.
 - **Hotkeys:** Hotkey + Start quits a game, Hotkey + Y / X saves / loads a state, and more

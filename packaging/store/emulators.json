@@ -102,6 +102,18 @@
       "description": "PlayStation 5 emulator (very experimental)",
       "source": {"type": "github", "repo": "KytyPS5/KytyPS5", "release": "latest", "asset": "-Linux-x86_64\\.tar\\.gz$", "archive": "tar.gz", "exe": "kyty_emulator"},
       "install": "/usr/bin/kyty", "systems": ["ps5"]
+    },
+    {
+      "id": "windows-arcade-loader", "name": "Windows Arcade Loader", "group": "EMULATORS",
+      "description": "Windows-based arcade games: Taito Type X, NESiCAxLive, Sega RingEdge, Namco ES3 and more (needs GE-Proton)",
+      "source": {"type": "github", "repo": "aderumier/windowsarcadeloader", "release": "latest", "asset": "^windows-arcade-loader-.*\\.tar\\.gz$", "archive": "tar.gz", "exe": "arcade-launcher"},
+      "install": "/usr/bin/windows-arcade-loader", "systems": ["typex"]
+    },
+    {
+      "id": "ge-proton", "name": "GE-Proton", "group": "EMULATORS",
+      "description": "Wine runner used by the Windows Arcade Loader (large download)",
+      "source": {"type": "github", "repo": "GloriousEggroll/proton-ge-custom", "release": "latest", "asset": "^GE-Proton[0-9-]+-x86_64\\.tar\\.gz$", "archive": "tar.gz", "exe": "proton"},
+      "install": "/usr/bin/ge-proton"
     }
   ]
 }

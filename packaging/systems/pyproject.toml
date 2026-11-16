@@ -14,6 +14,7 @@ ryujinx = "acrobato_emulators:Ryujinx"
 eglantine = "acrobato_emulators:Eglantine"
 lichii = "acrobato_emulators:Lichii"
 kyty = "acrobato_emulators:Kyty"
+windows-arcade-loader = "acrobato_emulators:WindowsArcadeLoader"
 
 [tool.setuptools]
 packages = ["acrobato_emulators"]

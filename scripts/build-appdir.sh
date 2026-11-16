@@ -14,6 +14,8 @@ PY_SHA=3fe0d7c0538eb5d190c34582992d26230532551355cbd789fabc6591621cfc07
 HK=package/batocera/utils/hotkeygen
 
 command -v patchelf >/dev/null || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq patchelf
+# cabextract, unzip: winetricks needs them (Windows Arcade Loader's Wine prefix); few distros ship cabextract
+command -v cabextract >/dev/null && command -v unzip >/dev/null || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cabextract unzip
 echo "$PY_SHA  $PY_TGZ" | sha256sum -c --quiet -
 
 rm -rf "$A"; mkdir -p "$A/usr/bin" "$A/usr/lib" "$A/usr/share" "$A/etc"
@@ -31,6 +33,13 @@ bundle_deps() {  # copy the non-excluded shared-library deps of "$@" into usr/li
     [ -e "$A/usr/lib/$name" ] || cp -L "$path" "$A/usr/lib/$name"
   done
 }
+
+# --- tools winetricks runs (Windows Arcade Loader) ---
+for t in cabextract unzip; do
+  cp -L "$(command -v $t)" "$A/usr/bin/"
+  bundle_deps "$A/usr/bin/$t"
+  patchelf --set-rpath '$ORIGIN/../lib' "$A/usr/bin/$t"
+done
 
 # --- EmulationStation ---
 cp "$ES_SRC/emulationstation" "$A/usr/bin/"

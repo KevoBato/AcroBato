@@ -30,7 +30,7 @@ from batocera_launch import BatoceraException, Command, Emulator, HotkeysContext
 USERDATA = Path(os.environ.get('ES_USERDATA', Path.home() / '.local/share/acrobato'))
 EMU_BIN = Path(os.environ.get('ES_USR', USERDATA / 'emulators/usr')) / 'bin'
 CATALOG_NAMES = {'eden': 'Eden', 'ryujinx': 'Ryujinx', 'eglantine': 'Eglantine', 'lichii': 'Lichii',
-                 'kyty': 'KytyPS5'}
+                 'kyty': 'KytyPS5', 'windows-arcade-loader': 'Windows Arcade Loader', 'ge-proton': 'GE-Proton'}
 
 
 def notify(text: str) -> None:
@@ -440,3 +440,118 @@ class Kyty(_Standalone):
         except OSError:
             pass
         return Command(args, env={'QT_QPA_PLATFORM': 'xcb', 'SDL_VIDEODRIVER': 'x11'})
+
+
+# --- Windows Arcade Loader (Taito Type X, NESiCAxLive, Sega RingEdge, Namco ES3, ...) ------------
+
+def _yaml(value: str | bool) -> str:
+    return ('true' if value else 'false') if isinstance(value, bool) else json.dumps(str(value))
+
+
+@cached_dataclass
+class WindowsArcadeLoader(_Standalone):
+    """Windows arcade games in Wine through aderumier's Windows Arcade Loader (GPL-3.0,
+    https://github.com/aderumier/windowsarcadeloader), as in Pixel Nostalgia's Batocera builds:
+    its arcade-launcher runs the game with the cabinet's I/O, dongle and network services
+    emulated, and maps the pads itself. Port of its Batocera generator
+    (tools/batocera/windowsArcadeLoaderGenerator.py) to batocera-launch.
+
+    The game is <dump>/<gameid>.windowsloader (the game id picks the loader's profile).
+    Needs GE-Proton (the Wine runner), also from the Content Downloader. The loader keeps its
+    Wine prefix and user profiles (controls per game, wheels, player order, cards) in its
+    own folder; its GUI ("Open Windows Arcade Loader") edits them."""
+
+    emulator_id = 'windows-arcade-loader'
+
+    @cached_property
+    def hotkeygen_context(self) -> HotkeysContext:
+        # exit: the launcher stops the game (and Wine) on SIGTERM; coin: P1 coin (key 5)
+        return {'name': self.emulator_id,
+                'keys': {'exit': 'pkill -TERM -u "$(id -u)" -x arcade-launcher', 'coin': 'KEY_5'}}
+
+    def _launcher_yaml(self, app: Path, runner: Path) -> None:
+        """Machine settings (layer 2 of every game profile): the GE-Proton from the Content
+        Downloader. Left alone once the user writes their own (no AcroBato marker line)."""
+        # The loader wants a Wine tree (bin/wine, lib/wine/...): GE-Proton's is its files/, so
+        # runners_dir is the GE-Proton folder and the runner "files".
+        # winetricks (Windows components for the Wine prefix): the loader looks in the runner's
+        # bin/, then <runners_dir>/winetricks; GE-Proton ships one in protonfixes/
+        tricks = runner / 'winetricks'
+        if not tricks.exists() and (runner / 'protonfixes/winetricks').exists():
+            tricks.unlink(missing_ok=True)
+            tricks.symlink_to('protonfixes/winetricks')
+        f = app / 'launcher.yaml'
+        marker = '# Written by AcroBato'
+        text = f.read_text(errors='replace') if f.exists() else ''
+        # the release ships Batocera's (paths under /userdata/system/wine/custom): replaced
+        if text and not text.startswith(marker) and '/userdata/system/wine/custom' not in text:
+            return  # the user's own
+        f.write_text(f'{marker} (remove this line to keep your own changes)\n'
+                     f'runners_dir: {json.dumps(str(runner))}\n'
+                     'runner: files\n'
+                     'payloads_dir: payloads\n'
+                     f'squashfs_saves: {json.dumps(str(USERDATA / "saves"))}\n')
+
+    def _options_layer(self) -> Path:
+        """The ES options as an extra profile layer (only the ones set, so a game's own
+        profile setting stays unless the user picks another)."""
+        get = self.config.get
+        top, inputs, env = {}, {'exit_combo': '[]'}, {}
+        if get('wal_reshade') in ('0', '1'):
+            top['reshade'] = _yaml(get('wal_reshade') == '1')
+        if get('wal_renderer') in ('dxvk', 'wined3d'):
+            top['dxvk'] = _yaml(get('wal_renderer') == 'dxvk')
+        if get('wal_mouse_guns') in ('0', '1'):
+            inputs['guns_mouse'] = _yaml(get('wal_mouse_guns') == '1')
+        if get('wal_keyboard') in ('0', '1'):
+            inputs['keyboard_enabled'] = _yaml(get('wal_keyboard') == '1')
+        if get('wal_sinden_border') in ('auto', '0', '1'):
+            env['WAL_SINDEN_BORDER'] = _yaml(get('wal_sinden_border'))
+        if get('wal_sinden_border_size'):
+            env['WAL_SINDEN_BORDER_SIZE'] = _yaml(get('wal_sinden_border_size'))
+        if get('wal_sinden_border_color'):
+            env['WAL_SINDEN_BORDER_COLOR'] = _yaml(get('wal_sinden_border_color'))
+        env['WAL_SINDEN_DETECTED'] = _yaml('1' if any(getattr(g, 'needs_borders', False) for g in self.guns or []) else '0')
+        if get('keep_aspect_ratio') in ('on', 'off'):
+            env['WAL_KEEP_ASPECT_RATIO'] = _yaml('1' if get('keep_aspect_ratio') == 'on' else '0')
+        if get('wal_crosshair') in ('0', '1'):
+            env['WAL_CROSSHAIR'] = _yaml(get('wal_crosshair'))
+        if get('wal_freeplay') in ('0', '1'):
+            env['WAL_FREEPLAY'] = _yaml(get('wal_freeplay'))
+        lines = [f'{k}: {v}' for k, v in top.items()]
+        for name, section in (('input', inputs), ('env', env)):
+            if section:
+                lines.append(f'{name}:')
+                lines += [f'  {k}: {v}' for k, v in section.items()]
+        layer = self.config_home / 'es-options.yaml'
+        layer.parent.mkdir(parents=True, exist_ok=True)
+        layer.write_text('\n'.join(lines) + '\n')
+        return layer
+
+    async def configure(self) -> Command:
+        installed_binary(self.emulator_id)
+        app = USERDATA / 'emulators/apps' / self.emulator_id
+        runner = USERDATA / 'emulators/apps/ge-proton'
+        if not (runner / 'files/bin/wine').exists():
+            msg = 'Windows Arcade Loader needs GE-Proton. Get it from Updates & Downloads > Content Downloader.'
+            notify(msg)
+            raise BatoceraException(msg)
+        self._launcher_yaml(app, runner)
+        # First game: the loader builds its shared Wine prefix (about 40 winetricks verbs:
+        # DirectX, Visual C++ runtimes..., recorded in .wal-tricks), many minutes with no window
+        tricks = app / 'wine-prefix/full/.wal-tricks'
+        done = len(tricks.read_text(errors='replace').split()) if tricks.exists() else 0
+        if not is_emulator_window(self.rom) and done < 35:
+            notify('Windows Arcade Loader: setting up Wine for the first game. This downloads Windows '
+                   'components and can take 10 minutes or more; the game starts when it is done.')
+        env = {
+            # the pads' ES mappings, ES's player order (by device), no HIDAPI (as in Batocera)
+            'SDL_GAMECONTROLLERCONFIG': self.get_sdl_game_controller_config(),
+            'SDL_JOYSTICK_HIDAPI': '0',
+            'WAL_PLAYER_PADS': ';'.join(c.device_path for c in self.controllers or [] if c and c.device_path),
+        }
+        if is_emulator_window(Path(self.rom)):
+            return Command(['sh', '-c', 'cd "$0" && exec ./arcade-launcher gui --root "$0"', app], env=env)
+        layer = self._options_layer()
+        return Command(['sh', '-c', 'cd "$0" && exec ./arcade-launcher run "$1" --root "$0" --profile "$2"',
+                        app, Path(self.rom), layer], env=env)
