@@ -397,6 +397,15 @@ def main() -> int:
         "shutil.copytree(relocate('/usr/share/rpcs3/Icons'), icon_target,",
     )
 
+    # RPCS3 games packed as dev_hdd0/game/<ID> squashfs images (PSN games, Namco System 357/369):
+    # recognised by their overlay being under /var/run, which is ES_RUN here
+    tweak(
+        roots,
+        'batocera_launch_rpcs3/emulator.py',
+        "str(self.rom).startswith('/var/run/')",
+        "str(self.rom).startswith((str(relocate('/var/run')) + '/', '/var/run/'))",
+    )
+
     # .squashfs roms and their writable overlays: Batocera mounts them with mount(8), which needs
     # root. On the desktop: squashfuse and fuse-overlayfs (bundled), files of the image shown as
     # the user's so the overlay can copy them up; unmounted with fusermount.
