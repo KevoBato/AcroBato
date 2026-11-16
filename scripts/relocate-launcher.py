@@ -336,6 +336,16 @@ def main() -> int:
         '                            _env[_k] = _v\n',
     )
 
+    # .squashfs roms: Batocera mounts them with mount(8), which needs root. An emulator that
+    # mounts images itself without root (Windows Arcade Loader: squashfuse + fuse-overlayfs)
+    # sets mounts_own_squashfs and gets the image path as the rom.
+    tweak(
+        roots,
+        'batocera_launch/rom.py',
+        "        if source.suffix == '.squashfs':\n",
+        "        if source.suffix == '.squashfs' and not getattr(getattr(needs_overlayfs, '__self__', None), 'mounts_own_squashfs', False):\n",
+    )
+
     # 4. report plain-string paths that still need a manual look
     leftovers = re.compile(r"""['"]/(?:userdata|usr/share)/""")
     for r, py in modules():

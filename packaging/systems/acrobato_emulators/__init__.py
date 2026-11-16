@@ -462,6 +462,9 @@ class WindowsArcadeLoader(_Standalone):
     own folder; its GUI ("Open Windows Arcade Loader") edits them."""
 
     emulator_id = 'windows-arcade-loader'
+    # .squashfs games: the loader mounts them itself (squashfuse + fuse-overlayfs, no root),
+    # their writes in <squashfs_saves>/<system>/<image name> (relocate-launcher.py tweak)
+    mounts_own_squashfs = True
 
     @cached_property
     def hotkeygen_context(self) -> HotkeysContext:

@@ -14,8 +14,11 @@ PY_SHA=3fe0d7c0538eb5d190c34582992d26230532551355cbd789fabc6591621cfc07
 HK=package/batocera/utils/hotkeygen
 
 command -v patchelf >/dev/null || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq patchelf
-# cabextract, unzip: winetricks needs them (Windows Arcade Loader's Wine prefix); few distros ship cabextract
-command -v cabextract >/dev/null && command -v unzip >/dev/null || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq cabextract unzip
+# Windows Arcade Loader: cabextract, unzip for winetricks (its Wine prefix; few distros ship
+# cabextract), squashfuse and fuse-overlayfs to mount .squashfs games without root
+for t in cabextract unzip squashfuse fuse-overlayfs; do
+  command -v $t >/dev/null || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $t
+done
 echo "$PY_SHA  $PY_TGZ" | sha256sum -c --quiet -
 
 rm -rf "$A"; mkdir -p "$A/usr/bin" "$A/usr/lib" "$A/usr/share" "$A/etc"
@@ -34,8 +37,8 @@ bundle_deps() {  # copy the non-excluded shared-library deps of "$@" into usr/li
   done
 }
 
-# --- tools winetricks runs (Windows Arcade Loader) ---
-for t in cabextract unzip; do
+# --- tools the Windows Arcade Loader runs (winetricks, .squashfs games) ---
+for t in cabextract unzip squashfuse fuse-overlayfs; do
   cp -L "$(command -v $t)" "$A/usr/bin/"
   bundle_deps "$A/usr/bin/$t"
   patchelf --set-rpath '$ORIGIN/../lib' "$A/usr/bin/$t"

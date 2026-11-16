@@ -52,7 +52,7 @@ WAL_SYSTEMS = [
     ('tsunami', 'Tsunami', 'Tsunami Visual Technologies', '2008', 'tsunami'),
     ('arcadepc', 'Arcade PC', 'Various', '2000', 'arcadepc'),
 ]
-SYSTEMS += [(name, full, maker, year, '.windowsloader .emuapp', [WAL]) for name, full, maker, year, _ in WAL_SYSTEMS]
+SYSTEMS += [(name, full, maker, year, '.windowsloader .squashfs .emuapp', [WAL]) for name, full, maker, year, _ in WAL_SYSTEMS]
 
 INFO = {
     'switch': """## Nintendo Switch
@@ -176,9 +176,13 @@ Install from Updates & Downloads > Content Downloader: "Windows Arcade Loader" a
 "GE-Proton" (the Wine it runs games with). The first game takes 10 minutes or more to start:
 the loader sets up Wine once (DirectX, Visual C++ runtimes...), for every game.
 
-Games: the game's dump folder, holding <gameid>.windowsloader (a small text file naming the
-game's executable; the game id picks the loader's settings for that game). The loader's README
-lists the supported games and their ids.
+Games, either way:
+- the game's dump folder, holding <gameid>.windowsloader (a small text file naming the game's
+  executable; the game id picks the loader's settings for that game)
+- the dump packed as one <game>.squashfs image (as Pixel Nostalgia's builds have them), with
+  <gameid>.windowsloader at its root. It is mounted read-only while the game runs; the game's
+  own writes (settings, saves) go to saves/<system>/<game>/.
+The loader's README lists the supported games and their ids.
 
 "Open Windows Arcade Loader" (in the Taito Type X list) opens its window: controls per game
 and device, wheel calibration, player order, NESiCA and e-Amusement cards.
