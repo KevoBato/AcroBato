@@ -88,7 +88,13 @@ def _fallback(args: list[str]) -> list[str]:
                     core = next((c.text for c in emu.iter('core')), name)
                     print(f'acrobato: {emulator} is not installed, using {name}', file=sys.stderr)
                     return args + ['-emulator', name, '-core', core]
+    # nothing else runs this system (e.g. 3DS without Azahar): say what to download
+    global NEEDS
+    NEEDS = next(e['name'] for e in catalog if e['id'] == emulator)
     return args
+
+
+NEEDS: str | None = None  # Content Downloader name of the emulator a game needs (set by _fallback)
 
 
 # --- controllers ---------------------------------------------------------------
@@ -266,7 +272,7 @@ def main() -> int:
     except Exception as e:  # never block a launch because of this check
         print(f'acrobato: emulator check skipped: {e}', file=sys.stderr)
     try:
-        if name := _missing_core(args):
+        if name := NEEDS or _missing_core(args):
             msg = f'This game needs "{name}". Install it from Updates & Downloads > Content Downloader.'
             print(f'acrobato: {msg}', file=sys.stderr)
             _notify(msg)

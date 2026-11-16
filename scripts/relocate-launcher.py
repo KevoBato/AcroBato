@@ -318,8 +318,10 @@ def main() -> int:
         # (also any other exit key combination of a standalone emulator, e.g. xemu's Ctrl+Q:
         # typed keys only reach a focused window, which Game Mode doesn't guarantee)
         # (keys arrive over D-Bus as key codes: a list, a single number, or a shell command string)
+        # (and an exit command Batocera's OS has but AcroBato doesn't, e.g. /usr/bin/rpcs3-exit)
         "        if hotkey == 'exit' and self.context.get('name') != 'retroarch' and (\n"
-        "                not isinstance(keys, str) or keys.startswith('KEY_')):\n"
+        "                not isinstance(keys, str) or keys.startswith('KEY_')\n"
+        "                or not __import__('shutil').which(keys.split()[0])):\n"
         "            keys = 'acrobato-emukill'\n",
     )
 
@@ -385,6 +387,61 @@ def main() -> int:
         'batocera_launch/emulators/pcsx2x6.py',
         "DATAINIT_DIR / 'bios' / 'namco2x6' / 'patches.zip'",
         "relocate('/usr/share/batocera/datainit/bios/namco2x6/patches.zip')",
+    )
+
+    # RPCS3's icons: a hardcoded /usr/share path (the Content Downloader puts them under ES_USR)
+    tweak(
+        roots,
+        'batocera_launch_rpcs3/emulator.py',
+        "shutil.copytree('/usr/share/rpcs3/Icons/', icon_target,",
+        "shutil.copytree(relocate('/usr/share/rpcs3/Icons'), icon_target,",
+    )
+
+    # .squashfs roms and their writable overlays: Batocera mounts them with mount(8), which needs
+    # root. On the desktop: squashfuse and fuse-overlayfs (bundled), files of the image shown as
+    # the user's so the overlay can copy them up; unmounted with fusermount.
+    tweak(
+        roots,
+        'batocera_common/fs.py',
+        "        await run('mount', *type_args, device, *option_args, mount_point, text=True, check=True)\n",
+        # (the FUSE tools leave a daemon behind, which inherits the launcher's open sockets: with
+        # run()'s captured output it would hold them open and the launch would wait forever.
+        # Nothing captured; only the exit status.)
+        "        _os = __import__('os')\n"
+        "        async def _fuse(*cmd):\n"
+        "            _n = asyncio.subprocess.DEVNULL\n"
+        "            p = await asyncio.create_subprocess_exec(*map(str, cmd), stdin=_n, stdout=_n, stderr=_n)\n"
+        "            if await p.wait():\n"
+        "                raise CalledProcessError(p.returncode, cmd)\n"
+        "        if _os.geteuid() != 0 and type == 'overlay':\n"
+        "            await _fuse('fuse-overlayfs', '-o', f'{options},squash_to_uid={_os.getuid()},squash_to_gid={_os.getgid()}', mount_point)\n"
+        "        elif _os.geteuid() != 0 and type is None and str(device).lower().endswith(('.squashfs', '.wsquashfs')):\n"
+        "            await _fuse('squashfuse', device, mount_point)\n"
+        "        else:\n"
+        "            await run('mount', *type_args, device, *option_args, mount_point, text=True, check=True)\n",
+    )
+    tweak(
+        roots,
+        'batocera_common/fs.py',
+        "    for attempt in range(attempts):\n        try:\n            await run('umount', mount_point, text=True, check=True)\n",
+        "    if __import__('os').geteuid() != 0:  # FUSE mounts on the desktop (see mount())\n"
+        "        tools = [t for t in ('fusermount3', 'fusermount') if __import__('shutil').which(t)]\n"
+        "        for attempt in range(attempts):\n"
+        "            for t in tools:\n"
+        "                try:\n"
+        "                    await run(t, '-u', mount_point, text=True, check=True)\n"
+        "                    return\n"
+        "                except CalledProcessError:\n"
+        "                    pass\n"
+        "            await asyncio.sleep(delay)\n"
+        "        for t in tools:\n"
+        "            try:\n"
+        "                await run(t, '-uz', mount_point, text=True, check=True)\n"
+        "                return\n"
+        "            except CalledProcessError:\n"
+        "                pass\n"
+        "        raise LazyDetachFailedError(mount_point, 'fusermount could not detach it')\n\n"
+        "    for attempt in range(attempts):\n        try:\n            await run('umount', mount_point, text=True, check=True)\n",
     )
 
     # 4. report plain-string paths that still need a manual look

@@ -268,6 +268,20 @@ def install_github(e: dict) -> str:
         appimage = app_dir / f"{e['id']}.AppImage"
         shutil.move(dl, appimage)
         appimage.chmod(0o755)
+        # data Batocera's launcher reads from the emulator's install (e.g. RPCS3's icons), which
+        # an AppImage keeps inside: "extract_files" (paths in the AppImage) are copied out to
+        # <app>/extracted/<path>, for "files" to place
+        if wanted := e['source'].get('extract_files'):
+            say('Extracting data files')
+            x = Path(tmp) / 'appimage'
+            x.mkdir()
+            subprocess.run([str(appimage), '--appimage-extract'], cwd=x, check=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            root = next(d for d in x.iterdir() if d.is_dir())  # squashfs-root (or AppDir)
+            for w in wanted:
+                if not (root / w).exists():
+                    raise RuntimeError(f'the AppImage does not contain {w}')
+                put(root / w, app_dir / 'extracted' / w)
     # Runs the AppImage directly when FUSE is available, otherwise extract-and-run.
     # relative to the launcher, so the data folder can be moved
     rel = os.path.relpath(appimage, target(e).parent)
