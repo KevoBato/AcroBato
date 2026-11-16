@@ -294,6 +294,162 @@
       "install": "/usr/lib/libretro/bsnes_libretro.so"
     },
     {
+      "id": "lr-azahar", "name": "Azahar (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Nintendo 3DS",
+      "source": {"type": "libretro", "core": "azahar"},
+      "install": "/usr/lib/libretro/azahar_libretro.so"
+    },
+    {
+      "id": "lr-pcsx2", "name": "LRPS2 (PCSX2) (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "PlayStation 2",
+      "source": {"type": "libretro", "core": "pcsx2"},
+      "install": "/usr/lib/libretro/pcsx2_libretro.so"
+    },
+    {
+      "id": "lr-play", "name": "Play! (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "PlayStation 2",
+      "source": {"type": "libretro", "core": "play"},
+      "install": "/usr/lib/libretro/play_libretro.so"
+    },
+    {
+      "id": "lr-mednafen_psx", "name": "Beetle PSX (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "PlayStation (accurate)",
+      "source": {"type": "libretro", "core": "mednafen_psx"},
+      "install": "/usr/lib/libretro/mednafen_psx_libretro.so"
+    },
+    {
+      "id": "lr-kronos", "name": "Kronos (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Sega Saturn",
+      "source": {"type": "libretro", "core": "kronos"},
+      "install": "/usr/lib/libretro/kronos_libretro.so"
+    },
+    {
+      "id": "lr-yabasanshiro", "name": "YabaSanshiro (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Sega Saturn",
+      "source": {"type": "libretro", "core": "yabasanshiro"},
+      "install": "/usr/lib/libretro/yabasanshiro_libretro.so"
+    },
+    {
+      "id": "lr-mesen", "name": "Mesen (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "NES and Famicom Disk System (accurate)",
+      "source": {"type": "libretro", "core": "mesen"},
+      "install": "/usr/lib/libretro/mesen_libretro.so"
+    },
+    {
+      "id": "lr-mesen-s", "name": "Mesen-S (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "SNES, Game Boy / Color, Super Game Boy, Satellaview",
+      "source": {"type": "libretro", "core": "mesen-s"},
+      "install": "/usr/lib/libretro/mesen-s_libretro.so"
+    },
+    {
+      "id": "lr-melondsds", "name": "melonDS DS (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Nintendo DS (newer melonDS core)",
+      "source": {"type": "libretro", "core": "melondsds"},
+      "install": "/usr/lib/libretro/melondsds_libretro.so"
+    },
+    {
+      "id": "lr-gpsp", "name": "gpSP (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Game Boy Advance (fast)",
+      "source": {"type": "libretro", "core": "gpsp"},
+      "install": "/usr/lib/libretro/gpsp_libretro.so"
+    },
+    {
+      "id": "lr-blastem", "name": "BlastEm (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Mega Drive / Genesis (accurate)",
+      "source": {"type": "libretro", "core": "blastem"},
+      "install": "/usr/lib/libretro/blastem_libretro.so"
+    },
+    {
+      "id": "lr-smsplus", "name": "SMS Plus GX (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Master System and Game Gear",
+      "source": {"type": "libretro", "core": "smsplus"},
+      "install": "/usr/lib/libretro/smsplus_libretro.so"
+    },
+    {
+      "id": "lr-stella", "name": "Stella (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Atari 2600 (current Stella)",
+      "source": {"type": "libretro", "core": "stella"},
+      "install": "/usr/lib/libretro/stella_libretro.so"
+    },
+    {
+      "id": "lr-hatarib", "name": "Hatari B (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Atari ST (alternate Hatari core)",
+      "source": {"type": "libretro", "core": "hatarib"},
+      "install": "/usr/lib/libretro/hatarib_libretro.so"
+    },
+    {
+      "id": "lr-fmsx", "name": "fMSX (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "MSX, MSX2, MSX2+",
+      "source": {"type": "libretro", "core": "fmsx"},
+      "install": "/usr/lib/libretro/fmsx_libretro.so"
+    },
+    {
+      "id": "lr-applewin", "name": "AppleWin (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Apple II",
+      "source": {"type": "libretro", "core": "applewin"},
+      "install": "/usr/lib/libretro/applewin_libretro.so"
+    },
+    {
+      "id": "lr-minivmac", "name": "Mini vMac (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Macintosh Plus",
+      "source": {"type": "libretro", "core": "minivmac"},
+      "install": "/usr/lib/libretro/minivmac_libretro.so"
+    },
+    {
+      "id": "lr-vice_x64sc", "name": "VICE x64sc (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Commodore 64 (cycle-exact)",
+      "source": {"type": "libretro", "core": "vice_x64sc"},
+      "install": "/usr/lib/libretro/vice_x64sc_libretro.so"
+    },
+    {
+      "id": "lr-vice_xscpu64", "name": "VICE xscpu64 (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Commodore 64 with SuperCPU",
+      "source": {"type": "libretro", "core": "vice_xscpu64"},
+      "install": "/usr/lib/libretro/vice_xscpu64_libretro.so"
+    },
+    {
+      "id": "lr-holani", "name": "Holani (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Atari Lynx",
+      "source": {"type": "libretro", "core": "holani"},
+      "install": "/usr/lib/libretro/holani_libretro.so"
+    },
+    {
+      "id": "lr-mednafen_lynx", "name": "Beetle Lynx (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Atari Lynx",
+      "source": {"type": "libretro", "core": "mednafen_lynx"},
+      "install": "/usr/lib/libretro/mednafen_lynx_libretro.so"
+    },
+    {
+      "id": "lr-gearcoleco", "name": "Gearcoleco (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "ColecoVision",
+      "source": {"type": "libretro", "core": "gearcoleco"},
+      "install": "/usr/lib/libretro/gearcoleco_libretro.so"
+    },
+    {
+      "id": "lr-gw", "name": "Game & Watch (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Nintendo Game & Watch",
+      "source": {"type": "libretro", "core": "gw"},
+      "install": "/usr/lib/libretro/gw_libretro.so"
+    },
+    {
+      "id": "lr-uzem", "name": "Uzem (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Uzebox",
+      "source": {"type": "libretro", "core": "uzem"},
+      "install": "/usr/lib/libretro/uzem_libretro.so"
+    },
+    {
+      "id": "lr-bk", "name": "BK (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Elektronika BK",
+      "source": {"type": "libretro", "core": "bk"},
+      "install": "/usr/lib/libretro/bk_libretro.so"
+    },
+    {
+      "id": "lr-sameduck", "name": "SameDuck (RetroArch core)", "group": "RETROARCH CORES",
+      "description": "Mega Duck",
+      "source": {"type": "libretro", "core": "sameduck"},
+      "install": "/usr/lib/libretro/sameduck_libretro.so"
+    },
+    {
       "id": "ge-proton", "name": "GE-Proton", "group": "EMULATORS",
       "description": "Wine runner used by the Windows Arcade Loader (large download)",
       "source": {"type": "github", "repo": "GloriousEggroll/proton-ge-custom", "release": "latest", "asset": "^GE-Proton[0-9-]+-x86_64\\.tar\\.gz$", "archive": "tar.gz", "exe": "proton"},

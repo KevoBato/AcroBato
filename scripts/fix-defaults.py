@@ -25,17 +25,27 @@ arch_path = defaults_dir / 'config-arch.yml'
 arch = yaml.safe_load(arch_path.read_text()) if arch_path.exists() else {}
 arch = arch or {}
 
+# RetroArch cores from the Content Downloader (not in the AppImage): a system that also has a
+# bundled core defaults to the bundled one, so it works without a download (standalone
+# emulators fall back to a bundled core at launch instead, see acrobato_launch.py)
+import json
+catalog = Path(__file__).resolve().parent.parent / 'packaging' / 'store' / 'emulators.json'
+downloadable = {e['source']['core'] for e in json.loads(catalog.read_text())['emulators']
+                if e['source']['type'] == 'libretro'}
+
 changed = []
 for system in ET.parse(share / 'emulationstation' / 'es_systems.cfg').getroot().findall('system'):
     name = system.findtext('name')
     offered = [(e.get('name'), c.text) for e in system.iter('emulator') for c in e.iter('core')]
     if not offered:
         continue
+    bundled = [(e, c) for e, c in offered if e == 'libretro' and c not in downloadable]
     cur = {**(base.get('default') or {}), **(arch.get('default') or {}),
            **(base.get(name) or {}), **(arch.get(name) or {})}
-    if (cur.get('emulator'), cur.get('core')) in offered:
+    cur_pair = (cur.get('emulator'), cur.get('core'))
+    if cur_pair in offered and not (cur_pair[0] == 'libretro' and cur_pair[1] in downloadable and bundled):
         continue
-    emu, core = next(((e, c) for e, c in offered if e == 'libretro'), offered[0])
+    emu, core = (bundled or [(e, c) for e, c in offered if e == 'libretro'] or offered)[0]
     entry = arch.setdefault(name, {}) or {}
     entry.update({'emulator': emu, 'core': core})
     arch[name] = entry
